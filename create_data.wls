@@ -38,12 +38,18 @@ a21 = a12;
 
 r1 = {{e1^2, 0}, {(e1^2 - 1) a21, 1}}//FullSimplify//ExpToTrig;
 r2 = {{1, (e2^2 - 1) a12}, {0, e2^2}}//FullSimplify//ExpToTrig;
+Print[r1];
+
+a = {{1, a12}, {a21, 1}};
+ai = Inverse[a];
+half = MatrixPower[ai, 1/2];
 
 edgeGenerators = {r1};
 
 generators = {r1, r2};
 
 edge1 = { seed };
+
 
 lastElementCount = 0;
 
@@ -68,6 +74,8 @@ For[iteration=1, iteration <= iterationLimit && lastEdgeCount != Length[edges], 
         edges = Union[edges, newElements, SameTest -> SameTotal]//Simplify//ExpToTrig;
     ];
 ];
+
+edges = Map[half.# &, edges, {2}];
 
 vertices = Union[Flatten[edges, 1], SameTest -> SameMatrix];
 
@@ -99,11 +107,11 @@ dataObject = <|
 |>;
 
 (* why are the norms different? *)
-For[i = 1, i <=Length[vertices], i++,
+(* For[i = 1, i <=Length[vertices], i++,
     vertex = vertices[[i]];
-    Print[{i, Norm[vertex], vertex}]
+    Print[{i, Norm[vertex]//N, vertex}]
 ];
-
+ *)
 
 If[FileExistsQ[dataFileName], DeleteFile[dataFileName]];
 Save[dataFileName, dataObject];

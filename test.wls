@@ -131,14 +131,14 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	];
 
 
-(* 	If[exportToPov,
+	If[exportToPov,
 		If[FileExistsQ[outputFileName], DeleteFile[outputFileName]];
 		POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J +UA"];
 		Run[cropCommand];
 		,
 		Export[outputFileName, graph];
 	]
-	Print["Saved the image to " <> outputFileName];  *)
+	Print["Saved the image to " <> outputFileName]; 
 ]
 
 exportAnimation[shape_, frameCount_] := Module[
