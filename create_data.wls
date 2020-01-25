@@ -1,6 +1,6 @@
 #!/usr/bin/env wolframscript
 
-symbol = {3, 3, 3};
+symbol = {5, 3, 2};
 
 numericalValue = True;
 
@@ -50,16 +50,18 @@ generators = {r1, r2};
 
 edge1 = { seed };
 
-
 lastElementCount = 0;
 
-For[iteration=1, iteration <= iterationLimit && lastElementCount != Length[edge1], iteration++,
-    lastElementCount = Length[edge1];
+For[iteration=1, iteration <= p1 - 1, iteration++,
+    AppendTo[edge1, r1.edge1[[Length[edge1]]]];
+(*     lastElementCount = Length[edge1];
     For[i=1, i<=Length[edgeGenerators], i++,
         newElements = Map[(generators[[i]].#)&, edge1];
         edge1 = Union[edge1, newElements, SameTest -> SameMatrix]//Simplify//ExpToTrig;
-    ];
+    ]; *)
 ];
+
+edge1 = edge1//Simplify//ExpToTrig;
 
 Print[" Each edge contains " <> IntegerString[Length[edge1]] <> " vertices."];
 If[Length[edge1] != p1 , Print["Error"]; Abort[]];

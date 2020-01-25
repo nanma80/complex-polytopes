@@ -4,9 +4,10 @@ tmp*
 *.png
 *.gif
 !output/**
+!output/static_test/**
 
 output/*test*.png
-output/*test*/**
+output/test/**
 output/*layer*/**
 output/*vertex_explode/**
 output/*images*/**

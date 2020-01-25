@@ -1,7 +1,17 @@
 #!/usr/bin/env wolframscript
 
 symbols = {
-	{3, 3, 3}
+    {3, 3, 3}
+    , {3, 5, 3}
+	, {4, 4, 2}
+    , {3, 4, 3}
+    , {5, 4, 2}
+    , {2, 4, 5}
+    , {3, 6, 2}
+    , {3, 3, 2}
+    , {3, 5/2, 3}
+    , {5, 3, 2}
+    , {5, 6, 2}
 };
 
 
@@ -11,7 +21,7 @@ imageFolder = "output";
 
 imageSize = {600, 450};
 
-rangeFactor = 1;
+rangeFactor = 0.8;
 
 Needs["POVRayRender`"];
 ConfigurePOVRayRender["POVRayPath" -> "C:\\Program Files\\POV-Ray\\v3.7\\bin\\pvengine64.exe"];
@@ -91,39 +101,63 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	outputFileName = "animation_frame_" <> IntegerString[serialNumber, 10, 4] <> ".png";
+	outputFileName = shapeFile <> "_animation_frame_" <> IntegerString[serialNumber, 10, 4] <> ".png";
 	outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
 
-	viewVertical = {0, 0, 1};
-	projectionVector4D = {Cos[theta], -Sin[theta]/5, 0,  - Sin[theta]};
+	(* projectionVector4D = {Cos[theta], -Sin[theta]/5, 0,  - Sin[theta]}; *)
+    projectionVector4D = realEdges[[1]][[1]];
+
 	projectionTo3D = getProjectionMatrix[projectionVector4D];
 	(* projectionTo3D = getProjectionMatrix2[{1, 1, 0, 0}, {1, 0, 0, 0}]; *)
 	(* projectionTo3D = IdentityMatrix[4][[1;;3]]; *)
+
+    viewVertical = projectToDirection[realEdges[[1]][[2]], projectionTo3D];
+    Print[viewVertical];
+
 	projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D;
+    (* projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D; *)
 
-	positiveEdges = Select[realEdges, Total[#].projectionVector4D >= 0 &];
-	negativeEdges = Select[realEdges, Total[#].projectionVector4D < 0 &];
-	Print[{Length[positiveEdges], Length[negativeEdges]}];
 
-	Print[Map[Norm, vertices]];
-	Print[Map[Norm, realVertices]];
+    graphElements = {
+        {
+            FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
+        }
+    };
+
+    positiveEdges = Select[realEdges, Total[#].projectionVector4D >= - 0.1 &];
+    negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 0.1 &];
+    Print[{Length[positiveEdges], Length[negativeEdges]}];
+
+    If[Length[realEdges[[1]]] > 2,     
+        graphElements = Union[graphElements, 
+            {
+                {
+                    Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
+                },
+
+                {
+                    Opacity[0.4], FaceForm[Green], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                }
+            }
+        ]
+        ,
+        graphElements = Union[graphElements,
+            {
+                {
+                    Opacity[1], FaceForm[Red], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
+                },
+                {
+                    Opacity[0.4], FaceForm[Green], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                }
+            }
+        ]
+
+    ];
 
 	graph = Graphics3D[
-		{
-			{
-				Opacity[0.8], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
-			},
-
-			{
-				Opacity[0.3], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
-			},
-
-			{
-				FaceForm[Yellow], Map[Sphere[#, thickness * 4]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
-			}
-		},
+        graphElements,
 		ViewVertical -> viewVertical,
 		ViewPoint -> {3, -4, 2}*3,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
@@ -133,7 +167,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	If[exportToPov,
 		If[FileExistsQ[outputFileName], DeleteFile[outputFileName]];
-		POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J +UA"];
+		POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J"];
 		Run[cropCommand];
 		,
 		Export[outputFileName, graph];
@@ -208,10 +242,12 @@ exportAnimation[shape_, frameCount_] := Module[
     Print["Saved the video to " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
 ];
 
-
 (* exportAnimation[shapes[[1]], 36]; *)
 
-exportImage[symbols[[1]], 0, 0, 1, "test"];
+For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
+    symbol = symbols[[symbolIndex]];
+    exportImage[symbol, 0, 0, 1, "static_test"];
+];
 (* exportImage[shapes[[1]], 0.1, 0, 2, "test"]; *)
 
 
