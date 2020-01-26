@@ -113,12 +113,11 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	(* projectionTo3D = getProjectionMatrix2[{1, 1, 0, 0}, {1, 0, 0, 0}]; *)
 	(* projectionTo3D = IdentityMatrix[4][[1;;3]]; *)
 
-    viewVertical = projectToDirection[realEdges[[1]][[2]], projectionTo3D];
+    viewVertical = - projectToDirection[realEdges[[1]][[2]], projectionTo3D];
     Print[viewVertical];
 
 	projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D;
     (* projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D; *)
-
 
     graphElements = {
         {
@@ -136,9 +135,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
                 {
                     Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
                 },
-
                 {
-                    Opacity[0.4], FaceForm[Green], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                    Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
                 }
             }
         ]
@@ -149,7 +147,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
                     Opacity[1], FaceForm[Red], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
                 },
                 {
-                    Opacity[0.4], FaceForm[Green], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                    Opacity[0.5], FaceForm[Blue], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
                 }
             }
         ]
@@ -159,7 +157,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	graph = Graphics3D[
         graphElements,
 		ViewVertical -> viewVertical,
-		ViewPoint -> {3, -4, 2}*3,
+		ViewPoint -> {3, -3, 3}*3,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -167,7 +165,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	If[exportToPov,
 		If[FileExistsQ[outputFileName], DeleteFile[outputFileName]];
-		POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J"];
+		POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J +UA"];
 		Run[cropCommand];
 		,
 		Export[outputFileName, graph];
@@ -175,7 +173,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	Print["Saved the image to " <> outputFileName]; 
 ]
 
-exportAnimation[shape_, frameCount_] := Module[
+exportAnimation[symbol_, frameCount_] := Module[
 	{
 		outputFolder,
 		gifFileName,
@@ -187,12 +185,15 @@ exportAnimation[shape_, frameCount_] := Module[
 		gifCommand
 	},
 
-	frameFolder = shape <> "_frames_0";
+    shape = getShapeName[symbol];
+    shapeFile = getFileName[symbol];
+
+	frameFolder = shapeFile <> "_frames_0";
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	gifFileName = shape <> "_0";
-	gifFolder = FileNameJoin[{imageFolder, shape}];
+	gifFileName = shapeFile <> "_0";
+	gifFolder = FileNameJoin[{imageFolder, shapeFile}];
 	If[!DirectoryQ[gifFolder], CreateDirectory[gifFolder]];
 
 
@@ -207,7 +208,7 @@ exportAnimation[shape_, frameCount_] := Module[
         (* , Table[k, {k, maxTheta + epsilon, epsilon, -thetaStep}] *)
     ];
 
-    maxPhi3d = Pi / 8;
+    maxPhi3d = Pi / 2;
     phi3dStep = maxPhi3d/Length[thetas];
     phi3ds = Table[k, {k, 0, maxPhi3d - phi3dStep, phi3dStep}];
 
@@ -217,7 +218,7 @@ exportAnimation[shape_, frameCount_] := Module[
         Print["Frame #" <> IntegerString[frameIndex] <> "/" <> IntegerString[Length[thetas]] 
             <> " ; theta: " <> ToString[theta, InputForm] 
             <> " ; phi3d: " <> ToString[phi3d, InputForm]];
-        exportImage[shape, theta, phi3d, frameIndex, frameFolder];
+        exportImage[symbol, theta, phi3d, frameIndex, frameFolder];
     ];
 
 	(* loop back*)
@@ -242,12 +243,13 @@ exportAnimation[shape_, frameCount_] := Module[
     Print["Saved the video to " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
 ];
 
-(* exportAnimation[shapes[[1]], 36]; *)
-
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportImage[symbol, 0, 0, 1, "static_test"];
+    exportAnimation[symbols[[symbolIndex]], 6];
+    (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
+    (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
+
 (* exportImage[shapes[[1]], 0.1, 0, 2, "test"]; *)
 
 
