@@ -208,7 +208,7 @@ exportAnimation[symbol_, frameCount_] := Module[
         (* , Table[k, {k, maxTheta + epsilon, epsilon, -thetaStep}] *)
     ];
 
-    maxPhi3d = Pi / 2;
+    maxPhi3d = 2 Pi / 3;
     phi3dStep = maxPhi3d/Length[thetas];
     phi3ds = Table[k, {k, 0, maxPhi3d - phi3dStep, phi3dStep}];
 
@@ -245,7 +245,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 6];
+    exportAnimation[symbols[[symbolIndex]], 54];
     (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
