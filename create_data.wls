@@ -1,6 +1,6 @@
 #!/usr/bin/env wolframscript
 
-symbol = {5, 3, 2};
+symbol = {3, 3, 3};
 
 numericalValue = True;
 
@@ -44,6 +44,10 @@ a = {{1, a12}, {a21, 1}};
 ai = Inverse[a];
 half = MatrixPower[ai, 1/2];
 
+seed = half.seed;
+r1 = half.r1.Inverse[half]//FullSimplify//ExpToTrig;
+r2 = half.r2.Inverse[half]//FullSimplify//ExpToTrig;
+
 edgeGenerators = {r1};
 
 generators = {r1, r2};
@@ -77,7 +81,7 @@ For[iteration=1, iteration <= iterationLimit && lastEdgeCount != Length[edges], 
     ];
 ];
 
-edges = Map[half.# &, edges, {2}];
+(* edges = Map[half.# &, edges, {2}]; *)
 
 vertices = Union[Flatten[edges, 1], SameTest -> SameMatrix];
 
