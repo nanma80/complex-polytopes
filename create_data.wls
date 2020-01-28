@@ -1,6 +1,6 @@
 #!/usr/bin/env wolframscript
 
-symbol = {3, 3, 3};
+symbol = {5, 6, 2};
 
 numericalValue = True;
 
@@ -12,6 +12,8 @@ SameTotal[edge1_, edge2_] := SameMatrix[Total[edge1], Total[edge2]];
 getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Numerator[q]] <> separator <> IntegerString[Denominator[q]]];
 getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_" <> getQString[symbol[[2]], "over"] <> "_" <> IntegerString[symbol[[3]]];
 getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[[2]], "/"] <> "}" <> IntegerString[symbol[[3]]];
+maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
+getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
 
 p1 = symbol[[1]];
 q = symbol[[2]];
@@ -40,7 +42,7 @@ r1 = {{e1^2, 0}, {(e1^2 - 1) a21, 1}}//FullSimplify//ExpToTrig;
 r2 = {{1, (e2^2 - 1) a12}, {0, e2^2}}//FullSimplify//ExpToTrig;
 Print[r1];
 
-a = {{1, a12}, {a21, 1}};
+a = {{1, a12}, {a21, 1.}};
 ai = Inverse[a];
 half = MatrixPower[ai, 1/2];
 
@@ -58,11 +60,6 @@ lastElementCount = 0;
 
 For[iteration=1, iteration <= p1 - 1, iteration++,
     AppendTo[edge1, r1.edge1[[Length[edge1]]]];
-(*     lastElementCount = Length[edge1];
-    For[i=1, i<=Length[edgeGenerators], i++,
-        newElements = Map[(generators[[i]].#)&, edge1];
-        edge1 = Union[edge1, newElements, SameTest -> SameMatrix]//Simplify//ExpToTrig;
-    ]; *)
 ];
 
 edge1 = edge1//Simplify//ExpToTrig;
@@ -104,12 +101,32 @@ If[Length[uniqueEdgeCounts] == 1,
 
 Print["Vertex count: " <> IntegerString[Length[vertices]] <> " Edge count: " <> IntegerString[Length[edges]] ];
 
+realVertices = Map[getReal, vertices];
+realEdges = Map[getReal, edges, {2}];
+
+dimension4th = {x1, x2, x3, x4}/.NMinimize[ maxNorm[{x1, x2, x3, x4}, realVertices], {x1, x2, x3, x4}][[2]];
+rot4th = Transpose[RotationMatrix[{dimension4th, {0, 0, 0, 1}}]];
+realVertices3d = Transpose[Transpose[realVertices.rot4th][[1;;3]]];
+dimension3rd = {x1, x2, x3}/.NMinimize[ maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}][[2]];
+rot3rd = Transpose[RotationMatrix[{dimension3rd, {0, 0, 1}}]];
+rot3rd4D = ArrayFlatten[{{rot3rd, 0},{0, 1}}];
+realVertices2d = Transpose[Transpose[realVertices3d.rot3rd][[1;;2]]];
+dimension2nd = {x1, x2}/.NMinimize[ maxNorm[{x1, x2}, realVertices2d], {x1, x2}][[2]];
+rot2nd = Transpose[RotationMatrix[{dimension2nd, {0, 1}}]];
+rot2nd4D = ArrayFlatten[{{rot2nd, 0}, {0, IdentityMatrix[2]}}];
+rot4D = rot4th.rot3rd4D.rot2nd4D;
+rotatedRealVertices = realVertices.rot4D;
+rotatedRealEdges = Map[#.rot4D&, realEdges];
+
+
 dataFolder = "data";
 dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
 
 dataObject = <|
     "vertices" -> vertices,
-    "edges" -> edges
+    "edges" -> edges,
+    "rotatedRealVertices" -> rotatedRealVertices,
+    "rotatedRealEdges" -> rotatedRealEdges
 |>;
 
 (* why are the norms different? *)

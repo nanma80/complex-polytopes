@@ -2,16 +2,17 @@
 
 symbols = {
     {3, 3, 3}
-    , {3, 5, 3}
-	, {4, 4, 2}
-    , {3, 4, 3}
-    , {5, 4, 2}
-    , {2, 4, 5}
-    , {3, 6, 2}
-    , {3, 3, 2}
-    , {3, 5/2, 3}
-    , {5, 3, 2}
-    , {5, 6, 2}
+    (* {3, 5, 3} *)
+	(* {4, 4, 2} *)
+    (* {3, 4, 3} *)
+    (* {5, 4, 2} *)
+    (* , {2, 4, 5} *)
+    (* {3, 6, 2} *)
+    (* , {3, 3, 2} *)
+    (* , {3, 5/2, 3} *)
+    (* , {5, 3, 2} *)
+    (* {5, 6, 2} *)
+    (* {5, 4, 3} *)
 };
 
 
@@ -86,52 +87,27 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	dataObject = Get[dataFileName];
 
-	edges = dataObject[["edges"]];
-	vertices = dataObject[["vertices"]];
+	realVertices = dataObject[["rotatedRealVertices"]];
+	realEdges = dataObject[["rotatedRealEdges"]];
 
-	Print["Vertex count: " <> IntegerString[Length[vertices]] <> " Edge count: " <> IntegerString[Length[edges]] ];
+	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
-	realVertices = Map[getReal, vertices];
-	realEdges = Map[getReal, edges, {2}];
-
-	thickness = Norm[vertices[[1]]] * 0.01;
+	thickness = Norm[realVertices[[1]]] * 0.01;
 	lighting = {{"Point", White, {10, -10, 10}}};
-	range = Norm[vertices[[1]]] * rangeFactor;
+	range = Norm[realVertices[[1]]] * rangeFactor;
 
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	outputFileName = shapeFile <> "_animation_frame_vertexFirst_" <> IntegerString[serialNumber, 10, 4] <> ".png";
+	outputFileName = shapeFile <> "_animation_frame_cellFirst" <> IntegerString[serialNumber, 10, 4] <> ".png";
 	outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
-
-	(* projectionVector4D = {Cos[theta], -Sin[theta]/5, 0,  - Sin[theta]}; *)
-    projectionVector4D = realEdges[[1]][[1]] + {0.000001, 0, 0.0000061, 0.0000021};
-
-	projectionTo3D = getProjectionMatrix[projectionVector4D];
-	(* projectionTo3D = getProjectionMatrix2[{1, 1, 0, 0}, {1, 0, 0, 0}]; *)
-	(* projectionTo3D = IdentityMatrix[4][[1;;3]]; *)
+	projectionTo3D = IdentityMatrix[4][[1;;3]].RotationMatrix[{{1, 0.000001, 0.0000061, 0.0000021}, {1, 0, 0, 0}}];
 
     firstProjectionTo3D = Map[projectToDirection[#, projectionTo3D]&, realVertices];
-    maxNorm = 0;
-    maxVertexIndex = -1;
-    For[vertexIndex = 1, vertexIndex <= Length[firstProjectionTo3D], vertexIndex++,
-        If[maxNorm < Norm[firstProjectionTo3D[[vertexIndex]]],
-            maxNorm = Norm[firstProjectionTo3D[[vertexIndex]]];
-            maxVertexIndex = vertexIndex
-        ];
-    ];
 
-    Print[maxNorm];
-    Print[maxVertexIndex];
-
-    viewVertical = firstProjectionTo3D[[maxVertexIndex]];
-    Print[viewVertical];
-
-
-	projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].RotationMatrix[{viewVertical, {0, 0, 1}}].projectionTo3D;
-    (* projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D; *)
+	projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].projectionTo3D;
     
     graphElements = {
         {
@@ -139,8 +115,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
         }
     };
 
-    positiveEdges = Select[realEdges, Total[#].projectionVector4D >= - 0.1 &];
-    negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 0.1 &];
+    positiveEdges = Select[realEdges, Total[#][[4]] >= - 0.1 &];
+    negativeEdges = Select[realEdges, Total[#][[4]] < - 0.1 &];
     Print[{Length[positiveEdges], Length[negativeEdges]}];
 
     If[Length[realEdges[[1]]] > 2,     
@@ -170,9 +146,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	graph = Graphics3D[
         graphElements,
-		(* ViewVertical -> viewVertical, *)
         ViewVertical -> {0, 0, 1},
-		ViewPoint -> {3, -3, 1}*3,
+		ViewPoint -> {2, -2, 1}*3,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -203,11 +178,11 @@ exportAnimation[symbol_, frameCount_] := Module[
     shape = getShapeName[symbol];
     shapeFile = getFileName[symbol];
 
-	frameFolder = shapeFile <> "_frames_vertexFirst";
+	frameFolder = shapeFile <> "_frames_cellFirst";
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	gifFileName = shapeFile <> "_vertexFirst";
+	gifFileName = shapeFile <> "_cellFirst";
 	gifFolder = FileNameJoin[{imageFolder, shapeFile}];
 	If[!DirectoryQ[gifFolder], CreateDirectory[gifFolder]];
 
@@ -252,7 +227,8 @@ exportAnimation[symbol_, frameCount_] := Module[
     Run[gifCommand];
     Print["Saved the animation to " <> gifFolder <> "\\" <> gifFileName <> ".gif"];
 
-    Run["del " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
+    mp4FileName = gifFolder <> "\\" <> gifFileName <> ".mp4";
+    If[FileExistsQ[mp4FileName], DeleteFile[mp4FileName]];
     Print[mp4Command];
     Run[mp4Command];
     Print["Saved the video to " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
@@ -260,11 +236,9 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 72];
+    exportAnimation[symbols[[symbolIndex]], 6];
     (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
-
-(* exportImage[shapes[[1]], 0.1, 0, 2, "test"]; *)
 
 
