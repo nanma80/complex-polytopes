@@ -2,16 +2,16 @@
 
 symbols = {
     {3, 3, 3}
-    (* , {3, 5, 3} *)
-	(* {4, 4, 2} *)
-    (* , {3, 4, 3} *)
-    (* , {5, 4, 2} *)
-    (* , {2, 4, 5} *)
-    (* {3, 6, 2} *)
-    (* {3, 3, 2} *)
-    (* , {3, 5/2, 3} *)
-    (* , {5, 3, 2} *)
-    (* , {5, 6, 2} *)
+    , {3, 5, 3}
+	, {4, 4, 2}
+    , {3, 4, 3}
+    , {5, 4, 2}
+    , {2, 4, 5}
+    , {3, 6, 2}
+    , {3, 3, 2}
+    , {3, 5/2, 3}
+    , {5, 3, 2}
+    , {5, 6, 2}
 };
 
 
@@ -135,9 +135,6 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     
     graphElements = {
         {
-            FaceForm[Purple], Map[Sphere[#, thickness * 5]&, Map[projectToDirection[#, projectionMatrix]&, {realVertices[[maxVertexIndex]]}]]
-        },
-        {
             FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
         }
     };
@@ -226,7 +223,7 @@ exportAnimation[symbol_, frameCount_] := Module[
         (* , Table[k, {k, maxTheta + epsilon, epsilon, -thetaStep}] *)
     ];
 
-    maxPhi3d = 2 Pi / 3;
+    maxPhi3d = Pi / 2;
     phi3dStep = maxPhi3d/Length[thetas];
     phi3ds = Table[k, {k, 0, maxPhi3d - phi3dStep, phi3dStep}];
 
@@ -243,7 +240,7 @@ exportAnimation[symbol_, frameCount_] := Module[
     gifCommand = "magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay "  
     (* no looping back *)
     (* gifCommand = "magick convert -quiet +repage -alpha remove -loop 0 -delay "  *)
-        <> IntegerString[Floor[150/frameCount]] <> " -dispose 2 " 
+        <> IntegerString[Floor[250/frameCount]] <> " -dispose 2 " 
         <> outputFolder <> "\\*animation_frame*.png " 
         <> gifFolder <> "\\" <> gifFileName <> ".gif";
 
@@ -255,7 +252,7 @@ exportAnimation[symbol_, frameCount_] := Module[
     Run[gifCommand];
     Print["Saved the animation to " <> gifFolder <> "\\" <> gifFileName <> ".gif"];
 
-    Run["rm " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
+    Run["del " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
     Print[mp4Command];
     Run[mp4Command];
     Print["Saved the video to " <> gifFolder <> "\\" <> gifFileName <> ".mp4"];
@@ -263,7 +260,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 6];
+    exportAnimation[symbols[[symbolIndex]], 72];
     (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
