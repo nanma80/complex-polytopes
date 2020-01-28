@@ -1,17 +1,18 @@
 #!/usr/bin/env wolframscript
 
 symbols = {
-    {3, 3, 3}
-    , {3, 5, 3}
-	, {4, 4, 2}
-    , {3, 4, 3}
-    , {5, 4, 2}
-    , {2, 4, 5}
-    , {3, 6, 2}
-    , {3, 3, 2}
-    , {3, 5/2, 3}
-    , {5, 3, 2}
-    , {5, 6, 2}
+    (* {3, 3, 3} *)
+    (* , {3, 5, 3} *)
+	(* , {4, 4, 2} *)
+    (* , {3, 4, 3} *)
+    (* , {5, 4, 2} *)
+    (* , {2, 4, 5} *)
+    (* , {3, 6, 2} *)
+    (* , {3, 3, 2} *)
+    (* , {3, 5/2, 3} *)
+    (* , {5, 3, 2} *)
+    (* , {5, 6, 2} *)
+    {5, 4, 3}
 };
 
 
@@ -260,9 +261,9 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 72];
+    (* exportAnimation[symbols[[symbolIndex]], 72]; *)
     (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
-    (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
+    exportImage[symbol, 0, Pi/4, 2, "static_test"];
 ];
 
 (* exportImage[shapes[[1]], 0.1, 0, 2, "test"]; *)

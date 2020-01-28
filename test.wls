@@ -3,9 +3,9 @@
 symbols = {
     (* {3, 3, 3} *)
     (* , {3, 5, 3} *)
-	{4, 4, 2}
+	(* {4, 4, 2} *)
     (* , {3, 4, 3} *)
-    (* , {5, 4, 2} *)
+    {5, 4, 2}
     (* , {2, 4, 5} *)
     (* {3, 6, 2} *)
     (* , {3, 3, 2} *)
@@ -33,6 +33,7 @@ getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Nu
 getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_" <> getQString[symbol[[2]], "over"] <> "_" <> IntegerString[symbol[[3]]];
 getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[[2]], "/"] <> "}" <> IntegerString[symbol[[3]]];
 getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
+maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
 
 getProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]][[2;;4]];
 getProjectionMatrix2[direction_, direction2_] := Simplify[Orthogonalize[{direction, {0, 10, 0,  1}, direction2, {-3, 3, -5, 0}}]][[2;;4]];
@@ -62,29 +63,31 @@ vertices = dataObject[["vertices"]];
 realVertices = Map[getReal, vertices];
 realEdges = Map[getReal, edges, {2}];
 
+(* realVertices = dataObject[["rotatedRealVertices"]];
+realEdges = dataObject[["rotatedRealEdges"]];
+ *)
 
-maxNormOld[direction4D_, realVertices_] := Max[Map[Norm, realVertices.Transpose[RotationMatrix[{direction4D, {0, 0, 0, 1}}][[1;;3]]] ]];
 
-maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
-dimension4th = {x1, x2, x3, x4}/.NMinimize[ maxNorm[{x1, x2, x3, x4}, realVertices], {x1, x2, x3, x4}][[2]];
+
+dimension4th = {x1, x2, x3, x4}/.NMinimize[ {maxNorm[{x1, x2, x3, x4}, realVertices], {x1, x2, x3, x4}.{x1, x2, x3, x4} <= 1 }, {x1, x2, x3, x4}][[2]];
 rot4th = Transpose[RotationMatrix[{dimension4th, {0, 0, 0, 1}}]];
-
 realVertices3d = Transpose[Transpose[realVertices.rot4th][[1;;3]]];
 
-dimension3rd = {x1, x2, x3}/.NMinimize[ maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}][[2]];
+dimension3rd = {x1, x2, x3}/.NMinimize[ {maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}.{x1, x2, x3} <= 1}, {x1, x2, x3}][[2]];
 rot3rd = Transpose[RotationMatrix[{dimension3rd, {0, 0, 1}}]];
 rot3rd4D = ArrayFlatten[{{rot3rd, 0},{0, 1}}];
 
-realVertices2d = Transpose[Transpose[realVertices3d.rot3rd][[1;;2]]];
+Map[#.rot4th.rot3rd4D&, realEdges]
 
-dimension2nd = {x1, x2}/.NMinimize[ maxNorm[{x1, x2}, realVertices2d], {x1, x2}][[2]];
+realVertices2d = Transpose[Transpose[realVertices3d.rot3rd][[1;;2]]];
+dimension2nd = {x1, x2}/.NMinimize[ {maxNorm[{x1, x2}, realVertices2d], {x1, x2}.{x1, x2} <= 1}, {x1, x2}][[2]];
 rot2nd = Transpose[RotationMatrix[{dimension2nd, {0, 1}}]];
 rot2nd4D = ArrayFlatten[{{rot2nd, 0}, {0, IdentityMatrix[2]}}];
-
 rot4D = rot4th.rot3rd4D.rot2nd4D;
-
 rotatedRealVertices = realVertices.rot4D;
 rotatedRealEdges = Map[#.rot4D&, realEdges];
+
+
 
 
 
