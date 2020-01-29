@@ -11,8 +11,8 @@ symbols = {
     (* , {3, 3, 2} *)
     (* , {3, 5/2, 3} *)
     (* , {5, 3, 2} *)
-    {5, 6, 2}
-    (* ,{5, 4, 3} *)
+    (* {5, 6, 2} *)
+    {5, 4, 3}
     (* {5, 3, 5} *)
 };
 
@@ -23,7 +23,7 @@ imageFolder = "output";
 
 imageSize = {600, 450};
 
-rangeFactor = 0.8;
+rangeFactor = 0.25;
 
 Needs["POVRayRender`"];
 ConfigurePOVRayRender["POVRayPath" -> "C:\\Program Files\\POV-Ray\\v3.7\\bin\\pvengine64.exe"];
@@ -91,6 +91,20 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	realVertices = dataObject[["rotatedRealVertices"]];
 	realEdges = dataObject[["rotatedRealEdges"]];
 
+    (* 562 *)
+    (* threshold = 3.476; *)
+
+    (* 543 *)
+    threshold = 2.940;
+
+    realVertices = Select[realVertices, #[[4]]>threshold&];
+    realEdges = Select[realEdges, #[[1]][[4]]>threshold && #[[2]][[4]]>threshold
+    && #[[3]][[4]]>threshold && #[[4]][[4]]>threshold && #[[5]][[4]]>threshold & ];
+
+    Print[realEdges[[1]]];
+    Print[realEdges[[2]]];
+
+
 	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
 	thickness = Norm[realVertices[[1]]] * 0.01;
@@ -124,7 +138,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
         graphElements = Union[graphElements, 
             {
                 {
-                    Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
+                    Opacity[0.8], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
                 },
                 {
                     Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
