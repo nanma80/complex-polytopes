@@ -7,7 +7,7 @@ symbols = {
     (* ,{3, 4, 3} *)
     (* ,{5, 4, 2} *)
     (* ,{2, 4, 5} *)
-    (* {3, 6, 2} *)
+    {3, 6, 2}
     (* , {3, 3, 2} *)
     (* , {3, 5/2, 3} *)
     (* , {5, 3, 2} *)
@@ -15,7 +15,6 @@ symbols = {
     (* ,{5, 4, 3} *)
     (* ,{5, 3, 5} *)
     (* {2, 6, 3} *)
-    {4, 3, 4}
 };
 
 
@@ -163,8 +162,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	graph = Graphics3D[
         graphElements,
-        ViewVertical -> {0, 0, 1},
-		ViewPoint -> {2, -2, 1}*3,
+        ViewVertical -> {0, Cos[theta], Sin[theta]},
+		ViewPoint -> {0, -Sin[theta], Cos[theta]}*300,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -205,7 +204,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 
     epsilon = 0.001;
-    maxTheta = Pi / 6 - epsilon 2;
+    maxTheta = Pi / 3 - epsilon 2;
     thetaStep = (maxTheta )/frameCount;
 
     thetas = Join[
@@ -215,7 +214,7 @@ exportAnimation[symbol_, frameCount_] := Module[
         (* , Table[k, {k, maxTheta + epsilon, epsilon, -thetaStep}] *)
     ];
 
-    maxPhi3d = Pi / 2;
+    maxPhi3d = Pi / 2 * 0.0001;
     phi3dStep = maxPhi3d/Length[thetas];
     phi3ds = Table[k, {k, 0, maxPhi3d - phi3dStep, phi3dStep}];
 
@@ -253,8 +252,8 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    (* exportAnimation[symbols[[symbolIndex]], 72]; *)
-    exportImage[symbol, 0, 0, 1, "static_test"];
+    exportAnimation[symbols[[symbolIndex]], 24];
+    (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
 
