@@ -94,13 +94,30 @@ For[i = 2, i<=Length[realVertices], i++,
 minNorm / Norm[realVertices[[1]]]
 (* 0.270091 *)
 
+(* 24-cell *)
+maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
+sameVertex[point1_, point2_] := point1 == point2;
+getEdgesFromFace[face_] := Table[{face[[i+1]], face[[Mod[i+1, Length[face]] + 1]]}, {i, 0, Length[face] - 1}];
+sameCenter[edge1_, edge2_] := Total[edge1] == Total[edge2];
+
+cells = Get["../star-polytope/data/polytope_3_4_3.wl"];
+faces = Flatten[cells, 1];
+(* edges = Union[ Flatten[Map[getEdgesFromFace, faces], 1], SameTest -> sameCenter]; *)
+realVertices = Union[ Flatten[faces,1], SameTest -> sameVertex];
+minNorm = 1000;
+For[i = 2, i<=Length[realVertices], i++,
+    norm = 1.0 Norm[realVertices[[i]] - realVertices[[1]]];
+    If[norm < minNorm, minNorm = norm];
+];
+minNorm / Norm[realVertices[[1]]]
+(* 24-cell: 1 *)
 
 
 symbols = {
     (* {3, 3, 3} *)
     (* {3, 5, 3} *)
 	(* {4, 4, 2} *)
-    (* , {3, 4, 3} *)
+    {3, 4, 3}
     (* {5, 4, 2} *)
     (* , {2, 4, 5} *)
     (* {3, 6, 2} *)
@@ -108,7 +125,7 @@ symbols = {
     (* , {3, 5/2, 3} *)
     (* {5, 3, 2} *)
     (* {5, 6, 2} *)
-    {5, 4, 3}
+    (* {5, 4, 3} *)
 };
 
 symbol = symbols[[1]];
@@ -217,6 +234,7 @@ minNorm / Norm[realVertices[[1]]]
 (* 543: 0.209057, wrong too *)
 (* 120-cell: 0.270091 *)
 (* 353: 0.618, correct. as same as 600-cell *)
+(* 362: 0.796225 *)
 
 norms = Map[Norm, realVertices];
 
