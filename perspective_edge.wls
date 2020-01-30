@@ -1,19 +1,19 @@
 #!/usr/bin/env wolframscript
 
 symbols = {
-    {3, 3, 3}
-    ,{3, 5, 3}
-	,{4, 4, 2}
-    ,{3, 4, 3}
-    ,{5, 4, 2}
-    ,{2, 4, 5}
+    (* {3, 3, 3} *)
+    (* ,{3, 5, 3} *)
+	{4, 4, 2}
+    (* ,{3, 4, 3} *)
+    , {5, 4, 2}
+    (* ,{2, 4, 5}
     ,{3, 6, 2}
     , {3, 3, 2}
     , {3, 5/2, 3}
     , {5, 3, 2}
     ,{5, 6, 2}
     ,{5, 4, 3}
-    ,{5, 3, 5}
+    ,{5, 3, 5} *)
 };
 
 
@@ -24,7 +24,7 @@ imageFolder = "output";
 imageSize = {600, 450};
 
 rangeFactor = 0.8;
-wDistance = 5;
+wDistance = 3;
 
 
 Needs["POVRayRender`"];
@@ -40,7 +40,7 @@ getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
 getProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]][[2;;4]];
 getProjectionMatrix2[direction_, direction2_] := Simplify[Orthogonalize[{direction, {0, 10, 0,  1}, direction2, {-3, 3, -5, 0}}]][[2;;4]];
 getFullProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]];
-perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] * (1 - point.(fullProjectionMatrix[[1]]) / wDistance);
+perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] * (1 + point.(fullProjectionMatrix[[1]]) / wDistance);
 
 projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
 projectTo3d[vertex4d_] := {vertex4d[[1]], vertex4d[[2]], vertex4d[[3]]};
@@ -115,6 +115,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
+    wDistance = Norm[realVertices[[1]]];
 	thickness = Norm[realVertices[[1]]] * 0.01;
 	lighting = {{"Point", White, {10, -10, 10}}};
 	range = Norm[realVertices[[1]]] * rangeFactor;

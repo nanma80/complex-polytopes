@@ -1,13 +1,13 @@
 #!/usr/bin/env wolframscript
 
 symbols = {
-    {3, 3, 3}
-    ,{3, 5, 3}
-	, {4, 4, 2}
-    ,{3, 4, 3}
+    (* {3, 3, 3} *)
+    (* ,{3, 5, 3} *)
+	{4, 4, 2}
+    (* ,{3, 4, 3} *)
     ,{5, 4, 2}
-    ,{2, 4, 5}
-    ,{3, 6, 2}
+    (* ,{2, 4, 5} *)
+    (* ,{3, 6, 2} *)
     (* , {3, 3, 2} *)
     (* , {3, 5/2, 3} *)
     (* , {5, 3, 2} *)
@@ -41,7 +41,7 @@ getProjectionMatrix2[direction_, direction2_] := Simplify[Orthogonalize[{directi
 projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
 projectTo3d[vertex4d_] := {vertex4d[[1]], vertex4d[[2]], vertex4d[[3]]};
 getFullProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]];
-perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] * (1 - point.(fullProjectionMatrix[[1]]) / wDistance);
+perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] * (1 + point.(fullProjectionMatrix[[1]]) / wDistance);
 getEdgesFromFace[face_] := Table[{face[[i+1]], face[[Mod[i+1, Length[face]] + 1]]}, {i, 0, Length[face] - 1}];
 sameVertex[point1_, point2_] := point1 == point2;
 sameCenter[edge1_, edge2_] := Total[edge1] == Total[edge2];
@@ -102,6 +102,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
+    wDistance = Norm[realVertices[[1]]];
 	thickness = Norm[realVertices[[1]]] * 0.01;
 	lighting = {{"Point", White, {10, -10, 10}}};
 	range = Norm[realVertices[[1]]] * rangeFactor;
