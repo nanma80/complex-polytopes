@@ -115,7 +115,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	outputFileName = shapeFile <> "_animation_frame_edgeFirst" <> IntegerString[serialNumber, 10, 4] <> ".png";
+	outputFileName = shapeFile <> "_animation_frame_edgeFirst_tilted" <> IntegerString[serialNumber, 10, 4] <> ".png";
 	outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
@@ -194,11 +194,11 @@ exportAnimation[symbol_, frameCount_] := Module[
     shape = getShapeName[symbol];
     shapeFile = getFileName[symbol];
 
-	frameFolder = shapeFile <> "_frames_edgeFirst";
+	frameFolder = shapeFile <> "_frames_edgeFirst_tilted";
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	gifFileName = shapeFile <> "_edgeFirst";
+	gifFileName = shapeFile <> "_edgeFirst_tilted";
 	gifFolder = FileNameJoin[{imageFolder, shapeFile}];
 	If[!DirectoryQ[gifFolder], CreateDirectory[gifFolder]];
 
