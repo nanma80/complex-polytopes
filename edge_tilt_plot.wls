@@ -163,16 +163,23 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     negativeEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] < - 0.1 &];
 
     Print[{Length[positiveEdges], Length[negativeEdges]}];
+    positiveEdgesEdges = Flatten[Map[getEdgesFromFace, positiveEdges], 1];
+    negativeEdgesEdges = Flatten[Map[getEdgesFromFace, negativeEdges], 1];
 
     If[Length[realEdges[[1]]] > 2,     
         graphElements = Union[graphElements, 
             {
                 {
                     Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
-                }
-                ,
+                },
+                {
+                    FaceForm[Red], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdgesEdges, {2}]]
+                },
                 {
                     Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                },
+                {
+                    FaceForm[Blue], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdgesEdges, {2}]]
                 }
             }
         ]

@@ -47,6 +47,10 @@ symbols = {
     , {5, 3, 2}
 };
 
+symbols = {
+    {3, 8, 2}
+};
+
 exportToPov = True;
 dataFolder = "data";
 imageFolder = "output";
@@ -163,15 +167,24 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
     Print[{Length[positiveEdges], Length[negativeEdges]}];
 
+    positiveEdgesEdges = Flatten[Map[getEdgesFromFace, positiveEdges], 1];
+    negativeEdgesEdges = Flatten[Map[getEdgesFromFace, negativeEdges], 1];
+
     If[Length[realEdges[[1]]] > 2,     
         graphElements = Union[graphElements, 
             {
                 {
                     Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
-                }
-                ,
+                },
+                {
+                    FaceForm[Red], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdgesEdges, {2}]]
+                },
+
                 {
                     Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+                },
+                {
+                    FaceForm[Blue], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdgesEdges, {2}]]
                 }
             }
         ]
@@ -281,8 +294,8 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 72];
-    (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
+    (* exportAnimation[symbols[[symbolIndex]], 72]; *)
+    exportImage[symbol, 0, 0, 1, "static_test"];
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
 
