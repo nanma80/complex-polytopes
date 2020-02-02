@@ -196,7 +196,6 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
                 }
             }
         ]
-
     ];
 
 	graph = Graphics3D[
