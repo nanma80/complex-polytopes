@@ -176,6 +176,10 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
 
     dataObject = <|
+        "seed" -> seed,
+        "r1" -> r1,
+        "r2" -> r2,
+        "symbol" -> symbol,
         "vertices" -> vertices,
         "edges" -> edges,
         "rotatedRealVertices" -> rotatedRealVertices,
