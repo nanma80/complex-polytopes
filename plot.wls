@@ -47,6 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
+(* symbols = { {3, 8, 2} }; *)
 
 exportToPov = True;
 dataFolder = "data";
@@ -182,7 +183,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
         graphElements = Union[graphElements, 
             {
                 {
-                    Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
+                    Opacity[1], FaceForm[Lighter[Red, 0.1]], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
                 },
                 {
                     FaceForm[Red], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdgesEdges, {2}]]
@@ -302,10 +303,8 @@ exportAnimation[symbol_, frameCount_] := Module[
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
     exportAnimation[symbols[[symbolIndex]], 72];
-    (* exportImage[symbol, 0, 0, 1, "static_test"]; *)
-    (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
+    exportImage[symbol, 0, 0, 1, getFileName[symbol]];
+    exportImage[symbol, 0, Pi/4, 2, getFileName[symbol]];
 ];
-
-(* exportImage[shapes[[1]], 0.1, 0, 2, "test"]; *)
 
 
