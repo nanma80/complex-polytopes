@@ -47,9 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = {
-    {3, 8, 2}
-};
+(* symbols = { {4, 4, 2} }; *)
 
 exportToPov = True;
 dataFolder = "data";

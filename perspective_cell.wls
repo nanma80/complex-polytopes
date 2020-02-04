@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2} *)
 };
 
-
+(* symbols = { {6, 4, 2} }; *)
 
 exportToPov = True;
 dataFolder = "data";
@@ -55,7 +55,7 @@ imageFolder = "output";
 
 imageSize = {600, 450};
 
-rangeFactor = 0.8;
+rangeFactor = 1.0;
 wDistance = 3;
 
 Needs["POVRayRender`"];
@@ -126,15 +126,25 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	realVertices = dataObject[["rotatedRealVertices"]];
 	realEdges = dataObject[["rotatedRealEdges"]];
 
+    wDistance = Norm[realVertices[[1]]];
+
     projectionVector4D = {0, 0, 0, 1};
-    fullProjectionMatrix = Join[ IdentityMatrix[4][[2;;4]], {IdentityMatrix[4][[1]]}] ;
+    (* fullProjectionMatrix = Join[ IdentityMatrix[4][[2;;4]], {IdentityMatrix[4][[1]]}] ; *)
+    fullProjectionMatrix = {
+        {0, 0, 0, 1},
+
+        {0, 0, 1, 0},
+        {0, 1, 0, 0},
+
+        {1, 0, 0, 0}
+    };
+
     realVertices3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, realVertices];
     realEdges3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, realEdges, {2}];
 
 
 	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
-    wDistance = Norm[realVertices[[1]]];
 	thickness = Norm[realVertices[[1]]] * 0.01;
 	lighting = {{"Point", White, {10, -10, 10}}};
 	range = Norm[realVertices[[1]]] * rangeFactor;
@@ -160,6 +170,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     positiveEdges3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, positiveEdges4D, {2}];
     negativeEdges3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, negativeEdges4D, {2}];
 
+    positiveEdgesEdges3D = Flatten[Map[getEdgesFromFace, positiveEdges3D], 1];
+    negativeEdgesEdges3D = Flatten[Map[getEdgesFromFace, negativeEdges3D], 1];
 
     Print[{Length[positiveEdges3D], Length[negativeEdges3D]}];
 
@@ -168,10 +180,15 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
             {
                 {
                     Opacity[1], FaceForm[Lighter[Red, 0.1]], Map[Polygon, Map[projectToDirection[#, rotation3D]&, positiveEdges3D, {2}]]
-                }
-                ,
+                },
+                {
+                    FaceForm[Red], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, rotation3D]&, positiveEdgesEdges3D, {2}]]
+                },
                 {
                     Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, rotation3D]&, negativeEdges3D, {2}]]
+                },
+                {
+                    FaceForm[Blue], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, rotation3D]&, negativeEdgesEdges3D, {2}]]
                 }
             }
         ]
