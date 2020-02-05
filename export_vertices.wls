@@ -1,25 +1,53 @@
 #!/usr/bin/env wolframscript
 
 symbols = {
-    (* {3, 3, 3} *)
-    (* , {3, 5, 3} *)
-	(* {4, 4, 2} *)
-    (* , {3, 4, 3} *)
-    (* {5, 4, 2} *)
-    (* , {2, 4, 5} *)
-    (* {3, 6, 2} *)
-    (* {4, 6, 2} *)
-    (* {4, 4, 3} *)
-    (* {3, 4, 4} *)
-    (* , {3, 3, 2} *)
-    (* , {3, 5/2, 3} *)
-    (* {5, 3, 2} *)
-    (* {5, 6, 2} *)
-    (* {5, 4, 3} *)
-    {3, 4, 5}
+    {3, 4, 2}
+    , {2, 4, 3}
+    , {4, 4, 2}
+    , {2, 4, 4}
+    , {5, 4, 2}
+    , {2, 4, 5}
+    , {6, 4, 2}
+    , {2, 4, 6}
+
+    , {3, 3, 3}
+
+    , {3, 6, 2}
+    , {2, 6, 3}
+
+    , {3, 4, 3}
+    , {4, 3, 4}
+
+    , {3, 8, 2}
+    , {2, 8, 3}
+
+    , {4, 6, 2}
+    , {2, 6, 4}
+
+    , {4, 4, 3}
+    , {3, 4, 4}
+
+    , {3, 5, 3}
+
+    , {5, 3, 5}
+
+    , {3, 10, 2}
+    , {2, 10, 3}
+
+    , {5, 6, 2}
+    , {2, 6, 5}
+
+    , {5, 4, 3}
+    , {3, 4, 5}
+    
+    (* starry *)
+    , {3, 3, 2}
+    , {3, 5/2, 3}
+    , {5, 5/2, 5}
+    , {5, 3, 2}
 };
 
-symbol = symbols[[1]];
+(* symbols = { {3, 8, 2} }; *)
 
 exportToPov = True;
 dataFolder = "data";
@@ -31,30 +59,39 @@ getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[
 
 dataFolder = "data";
 
-shape = getShapeName[symbol];
-shapeFile = getFileName[symbol];
+For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
+    symbol = symbols[[symbolIndex]];
 
-dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
+    shape = getShapeName[symbol];
+    shapeFile = getFileName[symbol];
 
-dataObject = Get[dataFileName];
+    dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
 
-realVertices = dataObject[["rotatedRealVertices"]];
-Print["4OFF"];
-Print["# Vertices for " <> shape <> " , 4D real representation"];
+    dataObject = Get[dataFileName];
 
-Print[Length[realVertices]];
-Print[];
-Print["# Vertices.  Each line is the XYZW coordinates of one vertex."];
+    vertexFileName = FileNameJoin[{dataFolder, shapeFile <> "_vertices.txt"}];
+    Print[vertexFileName];
 
-For[i = 1, i<= Length[realVertices], i++,
-    vertex = realVertices[[i]];
-    str = "";
-    For[j = 1, j <= 4, j++,
-        str = str <> ToString[DecimalForm[vertex[[j]], 100]];
-        If[j < 4,
-            str = str <> " ";
+    realVertices = dataObject[["rotatedRealVertices"]];
+    outputString = {
+        "4OFF",
+        "# Vertices for " <> shape <> " , 4D real representation",
+        IntegerString[Length[realVertices]],
+        "",
+        "# Vertices.  Each line is the XYZW coordinates of one vertex."
+    };
+
+    For[i = 1, i<= Length[realVertices], i++,
+        vertex = realVertices[[i]];
+        str = "";
+        For[j = 1, j <= 4, j++,
+            str = str <> ToString[DecimalForm[vertex[[j]], 100]];
+            If[j < 4,
+                str = str <> " ";
+            ];
         ];
+        AppendTo[outputString, str];
     ];
-    Print[str];
-];
 
+    Export[vertexFileName, outputString];
+];
