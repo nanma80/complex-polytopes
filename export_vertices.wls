@@ -69,7 +69,7 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
 
     dataObject = Get[dataFileName];
 
-    vertexFileName = FileNameJoin[{dataFolder, shapeFile <> "_vertices.txt"}];
+    vertexFileName = FileNameJoin[{dataFolder, "vertices", shapeFile <> "_vertices.txt"}];
     Print[vertexFileName];
 
     realVertices = dataObject[["rotatedRealVertices"]];
