@@ -65,7 +65,7 @@ sameVertex[point1_, point2_] := point1 == point2;
 getEdgesFromFace[face_] := Table[{face[[i+1]], face[[Mod[i+1, Length[face]] + 1]]}, {i, 0, Length[face] - 1}];
 sameCenter[edge1_, edge2_] := Total[edge1] == Total[edge2];
 
-cells = Get["../star-polytope/data/polytope_5_3_3_cell120.wl"];
+cells = Get["../star-polytope/data/polytope_3_3_5_cell600.wl"];
 faces = Flatten[cells, 1];
 (* edges = Union[ Flatten[Map[getEdgesFromFace, faces], 1], SameTest -> sameCenter]; *)
 realVertices = Union[ Flatten[faces,1], SameTest -> sameVertex];
@@ -91,8 +91,17 @@ For[i = 2, i<=Length[realVertices], i++,
     norm = 1.0 Norm[realVertices[[i]] - realVertices[[1]]];
     If[norm < minNorm, minNorm = norm];
 ];
-minNorm / Norm[realVertices[[1]]]
-(* 0.270091 *)
+minNormCount = 0;
+For[i = 2, i<=Length[realVertices], i++,
+    norm = 1.0 Norm[realVertices[[i]] - realVertices[[1]]];
+    If[Abs[norm - minNorm] < 0.001, minNormCount++ ];
+];
+
+Print[minNorm / Norm[realVertices[[1]]]];
+Print[minNormCount];
+
+(* 0.270091 for 120-cell *)
+(* 0.618034 for 600-cell *)
 
 (* 24-cell *)
 maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
@@ -116,8 +125,9 @@ minNorm / Norm[realVertices[[1]]]
 symbols = {
     (* {3, 3, 3} *)
     (* {3, 5, 3} *)
+    {5, 3, 5}
 	(* {4, 4, 2} *)
-    {3, 4, 3}
+    (* {3, 4, 3} *)
     (* {5, 4, 2} *)
     (* , {2, 4, 5} *)
     (* {3, 6, 2} *)
@@ -227,12 +237,19 @@ For[i = 2, i<=Length[realVertices], i++,
     norm = 1.0 Norm[realVertices[[i]] - realVertices[[1]]];
     If[norm < minNorm, minNorm = norm];
 ];
+minNormCount = 0;
+For[i = 2, i<=Length[realVertices], i++,
+    norm = 1.0 Norm[realVertices[[i]] - realVertices[[1]]];
+    If[Abs[norm - minNorm] < 0.001, minNormCount++ ];
+];
 
-minNorm / Norm[realVertices[[1]]]
+Print[minNorm / Norm[realVertices[[1]]]];
+Print[minNormCount];
 (* 562: 0.312869 *)
 (* this is wrong! *)
 (* 543: 0.209057, wrong too *)
 (* 120-cell: 0.270091 *)
+(* 535: 0.618. as same as 600-cell *)
 (* 353: 0.618, correct. as same as 600-cell *)
 (* 362: 0.796225 *)
 
