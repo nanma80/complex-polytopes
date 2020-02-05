@@ -49,9 +49,9 @@ symbols = {
 
 (* symbols = { {3, 8, 2} }; *)
 
-exportToPov = True;
 dataFolder = "data";
 imageFolder = "output";
+scaling = False;
 
 getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Numerator[q]] <> separator <> IntegerString[Denominator[q]]];
 getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_" <> getQString[symbol[[2]], "over"] <> "_" <> IntegerString[symbol[[3]]];
@@ -65,14 +65,20 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     shape = getShapeName[symbol];
     shapeFile = getFileName[symbol];
 
+    Print[shape];
     dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
 
     dataObject = Get[dataFileName];
 
-    vertexFileName = FileNameJoin[{dataFolder, "vertices", shapeFile <> "_vertices.txt"}];
-    Print[vertexFileName];
+    vertexFileName = FileNameJoin[{dataFolder, "vertices", shapeFile <> If[scaling, "_scaled", ""] <> "_vertices.txt"}];
 
     realVertices = dataObject[["rotatedRealVertices"]];
+    epsilon = 0.00001;
+    minNonZero = Min[Select[Map[Abs, Flatten[realVertices]], # > epsilon&]];
+
+    Print[minNonZero];
+    scaledRealVertices = Map[If[Abs[#] < epsilon, 0, # / minNonZero]&, realVertices, {2}];
+
     outputString = {
         "4OFF",
         "# Vertices for " <> shape <> " , 4D real representation",
@@ -82,10 +88,10 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     };
 
     For[i = 1, i<= Length[realVertices], i++,
-        vertex = realVertices[[i]];
+        vertex = If[scaling, scaledRealVertices[[i]], realVertices[[i]]];
         str = "";
         For[j = 1, j <= 4, j++,
-            str = str <> ToString[DecimalForm[vertex[[j]], 100]];
+            str = str <> ToString[DecimalForm[vertex[[j]], If[scaling, 6, 100]]];
             If[j < 4,
                 str = str <> " ";
             ];
