@@ -146,6 +146,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
     edgeCenter = Total[realEdges[[1]]]/Length[realEdges[[1]]];
     projectionVector4D = edgeCenter + {0.001, 0.0013, 0.0061, 0.0021};
+    (* special adjustment for 362 *)
+    projectionVector4D = projectionVector4D + {1, 1, 1, 1} / 3;
     projectionTo3D = getProjectionMatrix[projectionVector4D];
 
     viewVertical = {0, 0, 1};
@@ -181,8 +183,10 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
         }
     };
 
-    positiveEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] >= - 0.8 &];
-    negativeEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] < - 0.8 &];
+    (* normally -0.1 *)
+    positiveEdgesThreshold = - 1.1;
+    positiveEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] >= positiveEdgesThreshold &];
+    negativeEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] < positiveEdgesThreshold &];
 
     Print[{Length[positiveEdges], Length[negativeEdges]}];
 
