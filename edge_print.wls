@@ -162,7 +162,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
 
-	thickness = Norm[realVertices[[1]]] * 0.015;
+	thickness = Norm[realVertices[[1]]] * 0.02;
 	lighting = {{"Point", White, {10, -10, 10}}};
 	range = Norm[realVertices[[1]]] * rangeFactor;
 
