@@ -72,8 +72,21 @@ realEdges = dataObject[["rotatedRealEdges"]];
 dimension4th = {x1, x2, x3, x4}/.NMinimize[ {maxNorm[{x1, x2, x3, x4}, realVertices], {x1, x2, x3, x4}.{x1, x2, x3, x4} <= 1 }, {x1, x2, x3, x4}][[2]];
 rot4th = Transpose[RotationMatrix[{dimension4th, {0, 0, 0, 1}}]];
 realVertices3d = Transpose[Transpose[realVertices.rot4th][[1;;3]]];
+realEdges3d = Map[(#.Transpose[Transpose[rot4th][[1;;3]]])&, realEdges];
 
-dimension3rd = {x1, x2, x3}/.NMinimize[ {maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}.{x1, x2, x3} <= 1}, {x1, x2, x3}][[2]];
+closestDist = 10000;
+dimension3rd = {};
+For[i = 1, i<=Length[realEdges3d], i++,
+    edgeCenter = Total[realEdges3d[[i]]]/Length[realEdges3d[[i]]];
+    norm = Norm[edgeCenter];
+    If[norm < closestDist,
+        closestDist = norm;
+        dimension3rd = edgeCenter;
+    ];
+];
+
+(* dimension3rd = {x1, x2, x3}/.NMinimize[ {maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}.{x1, x2, x3} <= 1}, {x1, x2, x3}][[2]]; *)
+
 rot3rd = Transpose[RotationMatrix[{dimension3rd, {0, 0, 1}}]];
 rot3rd4D = ArrayFlatten[{{rot3rd, 0},{0, 1}}];
 

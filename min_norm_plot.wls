@@ -47,6 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
+(* symbols = {{5, 4, 2}}; *)
 
 exportToPov = True;
 dataFolder = "data";

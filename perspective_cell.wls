@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2} *)
 };
 
-(* symbols = { {6, 4, 2} }; *)
+(* symbols = { {5, 4, 2} }; *)
 
 exportToPov = True;
 dataFolder = "data";
@@ -132,11 +132,9 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     (* fullProjectionMatrix = Join[ IdentityMatrix[4][[2;;4]], {IdentityMatrix[4][[1]]}] ; *)
     fullProjectionMatrix = {
         {0, 0, 0, 1},
-
-        {0, 0, 1, 0},
+        {1, 0, 0, 0},
         {0, 1, 0, 0},
-
-        {1, 0, 0, 0}
+        {0, 0, 1, 0}
     };
 
     realVertices3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, realVertices];
