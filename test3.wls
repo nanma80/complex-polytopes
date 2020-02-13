@@ -56,6 +56,25 @@ getTriangularFaces[vertices_] := Module[
     faces
 ];
 
+getEdges[vertices_] := Module[
+    {edgeLength, i, j, k},
+    edges = {};
+    edgeLength = 10^10;
+    For[i = 2, i < Length[vertices], i++, 
+        If[ Norm[vertices[[i]] - vertices[[1]]] < edgeLength, edgeLength = Norm[vertices[[i]] - vertices[[1]]]];
+    ];
+
+    For[i = 1, i <= Length[vertices]-1, i++, 
+        For[j = i + 1, j <= Length[vertices], j++, 
+            If[Norm[vertices[[i]] - vertices[[j]]] == edgeLength,
+                AppendTo[edges, {i, j}];
+            ];
+        ];
+    ];
+    edges
+];
+
+(* build 3{6}2 *)
 a = Sqrt[1 + Sqrt[3]/2];
 realVertices = {
     {a, -a, -1, 0},
@@ -84,32 +103,36 @@ realVertices = {
     {-a, a, 1, 0}
 };
 
-(* vertex1 = {2, 1, 1, 0};
-perms = Permutations[vertex1];
-realVertices = Flatten[Map[allPlusMinus, perms], 1];
- *)
-edgeIndices = getTriangularFaces[realVertices];
-realEdges = Map[getEdge[#, realVertices]&, edgeIndices];
+faceIndices = getTriangularFaces[realVertices];
+Print[realVertices//Length];
+Print[faceIndices//Length];
+realEdges = Map[getEdge[#, realVertices]&, faceIndices];
 
-edgeCenter = Total[realEdges[[1]]]/Length[realEdges[[1]]];
+(* build the cage *)
+vertex1 = {2, 2, 1, 0};
+perms = Permutations[vertex1];
+cageVertices = Flatten[Map[allPlusMinus, perms], 1];
+
+edgeIndices = getEdges[cageVertices];
+
+vertex1 = {a, a, 1, 0};
+perms = Permutations[vertex1];
+cageVertices = Flatten[Map[allPlusMinus, perms], 1];
+
+cageEdges = Map[getEdge[#, cageVertices]&, edgeIndices];
+
+edgeCenter = {0, 0, 0, 0};
 projectionVector4D = edgeCenter + {0.001, 0.0013, 0.0061, 0.0021};
-projectionTo3D = getProjectionMatrix[projectionVector4D];
+(* projectionTo3D = getProjectionMatrix[projectionVector4D]; *)
+(* projectionTo3D = IdentityMatrix[4][[1;;3]]; *)
 
 viewVertical = {0, 0, 1};
 
-If[Length[realEdges[[1]]] == 2,
-    viewVertical = projectToDirection[(realEdges[[1]][[1]] - edgeCenter), projectionTo3D],
-    vector1 = projectToDirection[(realEdges[[1]][[1]] - edgeCenter), projectionTo3D];
-    vector2 = projectToDirection[(realEdges[[1]][[2]] - edgeCenter), projectionTo3D];
-    viewVertical = Orthogonalize[{vector1, vector2, {0.3, 510.234, 0.5}}][[3]]
-];
+(* Print["Bitruncated: Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ]; *)
 
-
-Print["Vertex count: " <> IntegerString[Length[realVertices]] <> " Edge count: " <> IntegerString[Length[realEdges]] ];
-
-thickness = Norm[realVertices[[1]]] * 0.01;
+thickness = Norm[cageVertices[[1]]] * 0.01;
 lighting = {{"Point", White, {10, -10, 10}}};
-range = Norm[realVertices[[1]]] * rangeFactor;
+range = Norm[cageVertices[[1]]] * rangeFactor;
 
 outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
@@ -118,45 +141,50 @@ outputFileName = "test3.png";
 outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
-(* projectionTo3D = IdentityMatrix[4][[1;;3]].RotationMatrix[{{1, 0.000001, 0.0000061, 0.0000021}, {1, 0, 0, 0}}]; *)
+projectionTo3D = IdentityMatrix[4][[1;;3]].RotationMatrix[{{1, 0.000001, 0.0000061, 0.0000021}, {1, 0, 0, 0}}];
 
-projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].RotationMatrix[{viewVertical, {0, 0, 1}}].projectionTo3D;
+projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].projectionTo3D;
 
+positiveEdges = Select[realEdges, Total[#][[4]] >= - 0.1 &];
+negativeEdges = Select[realEdges, Total[#][[4]] < - 0.1 &];
+Print[{Length[positiveEdges], Length[negativeEdges]}];
+positiveEdgesEdges = Flatten[Map[getEdgesFromFace, positiveEdges], 1];
+negativeEdgesEdges = Flatten[Map[getEdgesFromFace, negativeEdges], 1];
+
+cageColor = Purple;
 graphElements = {
+    {
+        FaceForm[cageColor], Map[Sphere[#, thickness * 1.5]&, Map[projectToDirection[#, projectionMatrix]&, cageVertices]]
+    },
     {
         FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
     }
 };
 
-positiveEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] >= - 0.1 &];
-negativeEdges = Select[realEdges, Total[#].projectionVector4D/Norm[Total[#]]/Norm[projectionVector4D] < - 0.1 &];
-
-Print[{Length[positiveEdges], Length[negativeEdges]}];
-
-If[Length[realEdges[[1]]] > 2,     
-    graphElements = Union[graphElements, 
+graphElements = Union[graphElements,
+    {
         {
-            {
-                Opacity[1], FaceForm[Red], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
-            }
-            ,
-            {
-                Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
-            }
+            FaceForm[cageColor], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, cageEdges, {2}]]
         }
-    ]
-    ,
-    graphElements = Union[graphElements,
-        {
-            {
-                Opacity[1], FaceForm[Red], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
-            },
-            {
-                Opacity[0.5], FaceForm[Blue], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
-            }
-        }
-    ]
+    }
+];
 
+graphElements = Union[graphElements, 
+    {
+        {
+            Opacity[1], FaceForm[Lighter[Red, 0.1]], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, positiveEdges, {2}]]
+        },
+        {
+            FaceForm[Red], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdgesEdges, {2}]]
+        },
+
+        {
+            Opacity[0.5], FaceForm[Blue], Map[Polygon, Map[projectToDirection[#, projectionMatrix]&, negativeEdges, {2}]]
+        },
+        {
+            FaceForm[Blue], Map[Cylinder[#, thickness]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdgesEdges, {2}]]
+        }
+    }
 ];
 
 graph = Graphics3D[
@@ -175,4 +203,4 @@ If[exportToPov,
     ,
     Export[outputFileName, graph];
 ]
-Print["Saved the image to " <> outputFileName]; 
+Print["Saved the image to " <> outputFileName];
