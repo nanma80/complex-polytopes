@@ -125,8 +125,9 @@ minNorm / Norm[realVertices[[1]]]
 symbols = {
     (* {3, 3, 3} *)
     (* {3, 5, 3} *)
-    {5, 3, 5}
+    (* {5, 3, 5} *)
 	(* {4, 4, 2} *)
+    {3, 8, 2},
     (* {3, 4, 3} *)
     (* {5, 4, 2} *)
     (* , {2, 4, 5} *)
@@ -252,6 +253,7 @@ Print[minNormCount];
 (* 535: 0.618. as same as 600-cell *)
 (* 353: 0.618, correct. as same as 600-cell *)
 (* 362: 0.796225 *)
+(* 382: 0.524648 *)
 
 norms = Map[Norm, realVertices];
 

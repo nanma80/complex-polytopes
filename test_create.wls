@@ -14,7 +14,7 @@ getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[
 maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
 getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
 
-symbol = {5, 6, 2};
+symbol = {3, 8, 2};
 (* {5, 4, 3} *)
 
 
@@ -133,6 +133,39 @@ dataObject = <|
     "rotatedRealVertices" -> rotatedRealVertices,
     "rotatedRealEdges" -> rotatedRealEdges
 |>;
+
+Print[rotatedRealVertices];
+
+epsilon = 0.00001;
+minNonZero = Min[Select[Map[Abs, Flatten[rotatedRealVertices]], # > epsilon&]];
+scaledRealVertices = Map[If[Abs[#] < epsilon, 0, # / minNonZero]&, rotatedRealVertices, {2}];
+
+(* Print[scaledRealVertices];
+
+1.22475 = Sqrt[6]/2
+3.67423 = 3 * Sqrt[6]/2
+2.44949 = Sqrt[6]
+ *)
+
+knownValues = {0, 1, Sqrt[6], Sqrt[6]/2, 3 Sqrt[6]/2};
+
+snap[value_, knownValues_] := Module[
+    {epsilon, snapValue, knownIndex, knownValue},
+    epsilon = 0.00001;
+    For[knownIndex = 1, knownIndex <= Length[knownValues], knownIndex++,
+        knownValue = knownValues[[knownIndex]];
+        For[offset = -4, offset <= 4, offset ++,
+            If[Abs[value - knownValue - offset] < epsilon, Return[knownValue + offset, Module] ];
+            If[Abs[value + knownValue + offset] < epsilon, Return[-knownValue - offset, Module] ]
+        ];
+    ];
+    Null
+];
+
+snappedVertices = Map[snap[#, knownValues]&, scaledRealVertices, {2}];
+vertices = snappedVertices;
+
+
 
 (* why are the norms different? *)
 (* For[i = 1, i <=Length[vertices], i++,
