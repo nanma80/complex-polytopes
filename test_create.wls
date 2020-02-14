@@ -139,6 +139,7 @@ Print[rotatedRealVertices];
 epsilon = 0.00001;
 minNonZero = Min[Select[Map[Abs, Flatten[rotatedRealVertices]], # > epsilon&]];
 scaledRealVertices = Map[If[Abs[#] < epsilon, 0, # / minNonZero]&, rotatedRealVertices, {2}];
+scaledRealEdges = Map[If[Abs[#] < epsilon, 0, # / minNonZero]&, rotatedRealEdges, {3}];
 
 (* Print[scaledRealVertices];
 
@@ -165,7 +166,8 @@ snap[value_, knownValues_] := Module[
 snappedVertices = Map[snap[#, knownValues]&, scaledRealVertices, {2}];
 vertices = snappedVertices;
 
-
+snappedEdges = Map[snap[#, knownValues]&, scaledRealEdges, {3}];
+edges = snappedEdges;
 
 (* why are the norms different? *)
 (* For[i = 1, i <=Length[vertices], i++,
