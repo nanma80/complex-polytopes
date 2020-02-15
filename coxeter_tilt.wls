@@ -164,7 +164,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
 
-    projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].projectionTo3D;
+    projectionMatrix = RotationMatrix[theta, {1, 0, 0}].projectionTo3D;
 
     graphElements = {
         {
@@ -213,8 +213,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	graph = Graphics3D[
         graphElements,
-        ViewVertical -> {0, Cos[theta], Sin[theta]},
-		ViewPoint -> {0, -Sin[theta], Cos[theta]}*300,
+        ViewVertical -> {0, 1, 0},
+		ViewPoint -> {0, 0, 1}*300,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -255,15 +255,18 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 
     epsilon = 0.001;
-    maxTheta = Pi / 3 - epsilon 2;
+    maxTheta = Pi - epsilon 2;
     thetaStep = (maxTheta )/frameCount;
 
     thetas = Join[
         Table[epsilon, {k, Floor[frameCount / 6]}]
         , Table[k, {k, epsilon, maxTheta + epsilon, thetaStep}]
-        (* , Table[maxTheta + epsilon, {k, Floor[frameCount / 6]}] *)
+        , Table[maxTheta + epsilon, {k, Floor[frameCount / 6]}]
         (* , Table[k, {k, maxTheta + epsilon, epsilon, -thetaStep}] *)
     ];
+
+    thetas = Map[(1-Cos[#])*Pi/2&, thetas];
+    Print[thetas];
 
     maxPhi3d = Pi / 2 * 0.0001;
     phi3dStep = maxPhi3d/Length[thetas];
@@ -282,7 +285,7 @@ exportAnimation[symbol_, frameCount_] := Module[
     gifCommand = "magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay "  
     (* no looping back *)
     (* gifCommand = "magick convert -quiet +repage -alpha remove -loop 0 -delay "  *)
-        <> IntegerString[Floor[250/frameCount]] <> " -dispose 2 " 
+        <> IntegerString[Floor[480/frameCount]] <> " -dispose 2 " 
         <> outputFolder <> "\\*animation_frame*.png " 
         <> gifFolder <> "\\" <> gifFileName <> ".gif";
 
@@ -303,7 +306,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 72];
+    exportAnimation[symbols[[symbolIndex]], 120];
     (* exportImage[symbol, 0, 0, 1, getFileName[symbol]]; *)
     (* exportImage[symbol, Pi/4, 0, 2, getFileName[symbol]]; *)
 ];
