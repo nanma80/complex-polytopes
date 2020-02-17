@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {3, 8, 2} };
+symbols = { {3, 6, 2} };
 
 epsilon = 0.00001;
 
@@ -55,6 +55,7 @@ dataFolder = "data";
 imageFolder = "output";
 scaling = False;
 
+SameFloat[v1_, v2_] := Abs[v1 - v2] < epsilon;
 SameMatrix[m1_, m2_] := ( m1 == m2 ) || (Max[Max[N[Abs[m1 - m2]]]] < epsilon);
 SameVertex[v1_, v2_] := ( v1 == v2 ) || (Norm[v1 - v2] < epsilon);
 getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Numerator[q]] <> separator <> IntegerString[Denominator[q]]];
@@ -82,6 +83,18 @@ decomposeUnitary[r1_] := Module[{eiphiby2, phi, r1Right, theta, eiphi1, eiphi2, 
     {phi, theta, psi, delta, phi1, phi2}
 ];
 
+nVector[r1_, p1_] := Module[{n1Matrix, n11, n12, epsilon}, 
+    epsilon = 0.000001;
+    n1Matrix = (r1 - IdentityMatrix[2])/(Exp[2 Pi I / p1] - 1);
+    n11 = Sqrt[Re[n1Matrix[[1]][[1]]]];
+    n12 = n1Matrix[[1]][[2]]/n11;
+    If[Abs[Im[n12]] < epsilon, n12 = Re[n12]];
+    (* these two tests are always true *)
+    (* Print[SameFloat[n11 Conjugate[n12], n1Matrix[[2]][[1]]]]; *)
+    (* Print[SameFloat[Abs[n12]^2, n1Matrix[[2]][[2]]]]; *)
+    {n11, n12}
+];
+
 dataFolder = "data";
 
 idMatrix = IdentityMatrix[2];
@@ -103,21 +116,35 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     r1 = dataObject[["r1"]];
     r2 = dataObject[["r2"]];
 
+    Print[];
     Print[shape];
-    Print["r1, r2"]
-    Print[r1];
-    Print[r2];
+    (* Print["r1, r2"] *)
+    (* Print[r1]; *)
+    (* Print[r2]; *)
+
+    n1 = nVector[r1, symbol[[1]]];
+    n2 = nVector[r2, symbol[[3]]];
+
+    (* n1 = {a, -b}, n2 = {b, -a} *)
+    Print[n1];
+    Print[n2];
+
+    (* Print[Map[Norm, {n1, n2}]]; *)
+
+    Print[ ArcCos[n1 . n2] /Pi];
+
+
 (*     Print[SameMatrix[r1.ConjugateTranspose[r1], idMatrix]];
     Print[SameMatrix[r2.ConjugateTranspose[r2], idMatrix]];
     Print[Det[r1]];
     Print[Det[r2]];
  *)
 
-    Print["decomposition: phi, theta, psi, delta, phi1, phi2"];
+    (* Print["decomposition: phi, theta, psi, delta, phi1, phi2"]; *)
     (* Print[decomposeUnitary[r1]]; *)
     (* Print[decomposeUnitary[r2]]; *)
 
-    angles1 = decomposeUnitary[r1];
+(*     angles1 = decomposeUnitary[r1];
     angles2 = decomposeUnitary[r2];
 
     Print["angles1"];
@@ -133,6 +160,7 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     Print[Map[Cos, angles2]];
     Print[Map[Tan, angles2]];
     Print[Map[Tan[#]^2&, angles2]];
+ *)
 
 (* 
     eiphiby2 = Sqrt[Det[r1]];
