@@ -102,6 +102,10 @@ idMatrix = IdentityMatrix[2];
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
 
+    p1 = symbol[[1]];
+    q = symbol[[2]];
+    p2 = symbol[[3]];
+
     shape = getShapeName[symbol];
     shapeFile = getFileName[symbol];
 
@@ -115,8 +119,9 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
 
     r1 = dataObject[["r1"]];
     r2 = dataObject[["r2"]];
+    seed = dataObject[["seed"]];
 
-    Print[];
+    (* Print[]; *)
     Print[shape];
     (* Print["r1, r2"] *)
     (* Print[r1]; *)
@@ -125,13 +130,74 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     n1 = nVector[r1, symbol[[1]]];
     n2 = nVector[r2, symbol[[3]]];
 
-    (* n1 = {a, -b}, n2 = {b, -a} *)
-    Print[n1];
-    Print[n2];
+    rot45 = RotationMatrix[-Pi/4];
+    (* Print[rot45]; *)
+    newn1 = n1 . rot45;
+    newn2 = n2 . rot45;
 
-    (* Print[Map[Norm, {n1, n2}]]; *)
+    newr1 = IdentityMatrix[2] + (Exp[2 Pi I / p1] - 1) (Transpose[{newn1}] . {newn1});
+    newr2 = IdentityMatrix[2] + (Exp[2 Pi I / p2] - 1) (Transpose[{newn2}] . {newn2});
 
-    Print[ ArcCos[n1 . n2] /Pi];
+    Print[newr1];
+    Print[newr2];
+
+    (* these are all confirmed *)
+    (* Print[SameMatrix[newr1, Transpose[rot45].r1.rot45]]; *)
+    (* Print[SameMatrix[newr2, Transpose[rot45].r2.rot45]]; *)
+    (* Print[SameMatrix[newr1.ConjugateTranspose[newr1], IdentityMatrix[2]]]; *)
+    (* Print[SameMatrix[newr2.ConjugateTranspose[newr2], IdentityMatrix[2]]]; *)
+
+    newSeed = Transpose[rot45] . seed;
+    Print[newSeed];
+    Print[newr2.newSeed];
+
+    Print[seed];
+    Print[r2.seed];
+
+    (* n1 = {a, -b}, n2 = {b, -a}. Both are always unit norm *)
+    (* Print[n1]; *)
+    (* Print[n2]; *)
+    (* Print[{Norm[n1], Norm[n2]}]; *)
+
+    (* n1: a > b, always *)
+    (* Print[Abs[n1[[1]]] > Abs[n1[[2]]]]; *)
+
+    twosigma = ArcCos[(Cos[Pi/p1] Cos[Pi/p2] + Cos[2 Pi/q])/(Sin[Pi/p1] Sin[Pi/p2])];
+    Print[twosigma//N];
+
+    Print[newn1];
+    Print[{Cos[twosigma/4], Sin[twosigma/4]}//N];
+
+    Print[newn2];
+    Print[{Cos[twosigma/4], -Sin[twosigma/4]}//N];
+
+    (* Print[n1 . n2]; *)
+    cosHalfSigma = Sqrt[(Sqrt[(Cos[Pi/p1 - Pi/p2] + Cos[2 Pi/q])/(2 Sin[Pi/p1] Sin[Pi/p2])] + 1)/2];
+    (* cosHalfSigma = Assuming[p1 > 0 && p2 > 0 && q > 0, FullSimplify[cosHalfSigma]]; *)
+
+    halfSigma = ArcCos[cosHalfSigma];
+
+    theta1 = -Pi/4 + halfSigma;
+    theta2 = -Pi/4 - halfSigma;
+    (* Print[SameMatrix[n1, {Cos[theta1], Sin[theta1]}]]; *)
+    (* Print[SameMatrix[n2, {Cos[theta2], Sin[theta2]}]]; *)
+    n1Precise = {Cos[theta1], Sin[theta1]};
+    n2Precise = {Cos[theta1], Sin[theta1]};
+    (* Print[n1Precise]; *)
+    (* Print[n2Precise]; *)
+
+    (* n1 . n2 == Sqrt[(Cos[Pi/p1 - Pi/p2] + Cos[2 Pi/q])/(2 Sin[Pi/p1] Sin[Pi/p2])]] *)
+    (* that sqrt is -a12 in the original construction *)
+    (* Print[Abs[n1.n2 - Sqrt[(Cos[Pi/p1 - Pi/p2] + Cos[2 Pi/q])/(2 Sin[Pi/p1] Sin[Pi/p2])]] < epsilon]; *)
+
+    (* when n1 = {a, -b}, seed == {a, b} / (a^2 - b^2) *)
+    (* Print[SameMatrix[ (Transpose[seed])[[1]], {n1[[1]], -n1[[2]]}/(n1[[1]]^2 - n1[[2]]^2) ]]; *)
+    (* Print[seed/Norm[seed]]; *)
+    (* Print[{n1[[1]], -n1[[2]]}/(n1[[1]]^2 - n1[[2]]^2)]; *)
+
+    (* n1.seed == 1, n2.seed == 0*)
+    (* Print[Abs[(n1 . seed)[[1]] - 1] < epsilon ]; *)
+    (* Print[Abs[(n2 . seed)[[1]]] < epsilon]; *)
 
 
 (*     Print[SameMatrix[r1.ConjugateTranspose[r1], idMatrix]];
