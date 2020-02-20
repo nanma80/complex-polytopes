@@ -329,6 +329,10 @@ of the middle point.
 As same as:
 Cos[ArcSec[Sqrt[3]]/2]
 0.8880738339771153
+mid1={1/Sqrt[3], 1/Sqrt[3], 0, 1/Sqrt[3] + 1}/(its norm)
+mid2= mid1 rotating components 4->1->2
+Norm[mid1-mid2]/Norm[mid1] = Sqrt[3/(3 + Sqrt[3])] = 0.7962252170181258
+matching previous result
 
 The 16-cell has another set of vertex coordinates based on cell first.
 vertex = {1, -1, -1, 1}
