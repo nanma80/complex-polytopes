@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {3, 6, 2} };
+symbols = { {3, 10, 2} };
 
 epsilon = 0.00001;
 
@@ -138,8 +138,8 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     newr1 = IdentityMatrix[2] + (Exp[2 Pi I / p1] - 1) (Transpose[{newn1}] . {newn1});
     newr2 = IdentityMatrix[2] + (Exp[2 Pi I / p2] - 1) (Transpose[{newn2}] . {newn2});
 
-    Print[newr1];
-    Print[newr2];
+    (* Print[newr1]; *)
+    (* Print[newr2]; *)
 
     (* these are all confirmed *)
     (* Print[SameMatrix[newr1, Transpose[rot45].r1.rot45]]; *)
@@ -163,7 +163,13 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     (* Print[Abs[n1[[1]]] > Abs[n1[[2]]]]; *)
 
     twosigma = ArcCos[(Cos[Pi/p1] Cos[Pi/p2] + Cos[2 Pi/q])/(Sin[Pi/p1] Sin[Pi/p2])];
-    Print[twosigma//N];
+    Print[twosigma];
+    sigma = twosigma/2;
+
+    Print["cos sigma"];
+    Print[Cos[sigma]//FullSimplify];
+    Print[Cos[sigma]//N];
+    Print[n1.n2];
 
     Print[newn1];
     Print[{Cos[twosigma/4], Sin[twosigma/4]}//N];
@@ -263,3 +269,102 @@ phi = 2 Pi/p1 for r1, 2 Pi/p2 for r2
 phi2 = - Pi/2 always
 
  *)
+
+
+(* 
+3{3}3: based on 16-cell. two generators are a vertex and a 2d face center.
+the vertex is (0, 0, 0, 1).
+face: (0, 0, 0, 1), (1, 0, 0, 0), (0, 1, 0, 0)
+normalized center: (1, 1, 0, 1)/Sqrt[3]
+inner prod: 1/Sqrt[3]. matching Cos[sigma].
+
+3{4}3: based on 24-cell. the two generators are around
+a vertex and a 2d face center.
+In the vertex first orientation, a vertex is (0,0,0,1)
+a face has 3 vertices: (0,0,0,1), (1/2, 1/2, 1/2, 1/2), (1/2, 1/2, -1/2, 1/2)
+center: (1/3, 1/3, 0, 2/3). norm(center) = sqrt(6)/3
+normalized center = (1,1,0,2)/sqrt(6)
+inner prod: 2/sqrt(6)=sqrt(2/3), which matches the theoretical value, Cos[sigma]=Sqrt[2/3]
+
+4{3}4: based on 24-cell. vertex and and a square (equator of an octahedron).
+vertex: (0,0,0,1). 
+face center, mid point between (0,0,0,1) to (1,0,0,0). (1,0,0,1)/Sqrt[2]
+inner prod: 1/Sqrt[2]. Correct.
+
+3{5}3: based on 600-cell. vertex and a triangle.
+vertex: (1,0,0,0)
+face: (1,0,0,0), (phi, 1, 1/phi, 0)/2, (phi, 1, -1/phi, 0)/2 
+normalized face center: {1 + phi, 1, 0, 0}/Sqrt[1+(1+phi)^2]
+inner prod:
+Sqrt[(3 + Sqrt[5])/6]
+0.9341723589627157
+Correct
+
+
+5{3}5: based on 600-cell. Vertex and a pentagon.
+
+face = {
+ {phi, 1, 1/phi, 0}/2,
+ {phi, 1, -1/phi, 0}/2,
+ {phi, 0, 1, 1/phi}/2,
+ {phi, 0, -1, 1/phi}/2,
+ {phi, -1/phi, 0, 1}/2
+};
+vertex =  {phi, -1/phi, 0, 1}/2;
+Dot[vertex, faceCenter]//FullSimplify//InputForm
+Sqrt[(5 + Sqrt[5])/10]
+0.85065080835204
+it is equal to Cos[ArcSec[Sqrt[5]]/2]. So, correct.
+
+
+3{6}2:
+Truncated 3{3}3, which has 
+the vertex = (0, 0, 0, 1).
+and the normalized face enter: (1, 1, 0, 1)/Sqrt[3]
+The middle point = {1/Sqrt[3], 1/Sqrt[3], 0, 1/Sqrt[3] + 1}/(its norm)
+inner product between the middle point and the vertex = the last component 
+of the middle point. 
+(1/Sqrt[3] + 1)/Sqrt[2/3 + (1/Sqrt[3] +1)^2]
+= Sqrt[(3 + Sqrt[3])/6]
+As same as:
+Cos[ArcSec[Sqrt[3]]/2]
+0.8880738339771153
+
+The 16-cell has another set of vertex coordinates based on cell first.
+vertex = {1, -1, -1, 1}
+face = 
+{{1, -1, -1, 1},
+{-1, 1, -1, 1},
+{-1, -1, 1, 1}}
+The result is the same. The form of the mid point is not better.
+
+3{8}2:
+Truncated 3{4}3, which has
+vertex = {0,0,0,1};
+faceCenter = {1,1,0,2}/Sqrt[6];
+mid = (vertex + faceCenter);
+mid = mid/Norm[mid]//FullSimplify;
+mid.vertex : Sqrt[1/2 + 1/Sqrt[6]]
+0.9530206138714226
+x = mid.vertex
+y = Cos[ArcCos[Sqrt[2/3]]/2]
+Correct.
+mid (not normalized) = {1, 1, 0, 2 + Sqrt[6]}
+face = {{0,0,0,1}, {1/2, 1/2, 1/2, 1/2}, {1/2, 1/2, -1/2, 1/2}}
+
+3{10}2:
+Truncated 3{5}3
+vertex= {1,0,0,0};
+faceCenter= {1 + phi, 1, 0, 0}/Sqrt[1+(1+phi)^2]/.phi->GoldenRatio;
+mid = (vertex + faceCenter);
+mid = mid/Norm[mid]//FullSimplify;
+x = mid.vertex
+0.983405
+y = Cos[ArcCos[Sqrt[(3 + Sqrt[5])/6]]/2]
+x = Sqrt[2 + Sqrt[(2*(3 + Sqrt[5]))/3]]/2
+Same.
+
+
+
+
+*)
