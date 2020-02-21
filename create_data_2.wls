@@ -1,0 +1,209 @@
+#!/usr/bin/env wolframscript
+
+symbols = {
+    {3, 4, 2}
+    , {2, 4, 3}
+    , {4, 4, 2}
+    , {2, 4, 4}
+    , {5, 4, 2}
+    , {2, 4, 5}
+    , {6, 4, 2}
+    , {2, 4, 6}
+
+    , {3, 3, 3}
+
+    , {3, 6, 2}
+    , {2, 6, 3}
+
+    , {3, 4, 3}
+    , {4, 3, 4}
+
+    , {3, 8, 2}
+    , {2, 8, 3}
+
+    , {4, 6, 2}
+    , {2, 6, 4}
+
+    , {4, 4, 3}
+    , {3, 4, 4}
+
+    , {3, 5, 3}
+
+    , {5, 3, 5}
+
+    , {3, 10, 2}
+    , {2, 10, 3}
+
+    , {5, 6, 2}
+    , {2, 6, 5}
+
+    , {5, 4, 3}
+    , {3, 4, 5}
+    
+    (* starry *)
+    , {3, 3, 2}
+    , {3, 5/2, 3}
+    , {5, 5/2, 5}
+    , {5, 3, 2}
+};
+
+
+symbols = {{3, 6, 2}};
+
+numericalValue = True;
+epsilon = 1*^-5;
+iterationLimit = 20;
+phi = GoldenRatio;
+configs = Get["configs.wl"]
+configs = configs /.{phi -> GoldenRatio};
+
+SameMatrix[m1_, m2_] := ( m1 == m2 ) || (Max[Max[N[Abs[m1 - m2]]]] < epsilon);
+SameTotal[edge1_, edge2_] := SameMatrix[Total[edge1], Total[edge2]];
+getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Numerator[q]] <> separator <> IntegerString[Denominator[q]]];
+getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_" <> getQString[symbol[[2]], "over"] <> "_" <> IntegerString[symbol[[3]]];
+getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[[2]], "/"] <> "}" <> IntegerString[symbol[[3]]];
+maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
+getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
+getComplex[v4d_] := {v4d[[1]] + v4d[[2]] I, v4d[[3]] + v4d[[4]] I};
+getGeneratorMatrix[pi_, norm_] := FullSimplify[IdentityMatrix[2] + (Exp[2 Pi I / pi] - 1) (ConjugateTranspose[{norm}] . {norm})];
+
+For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
+    symbol = symbols[[symbolIndex]];
+    p1 = symbol[[1]];
+    q = symbol[[2]];
+    p2 = symbol[[3]];
+
+    n14d = configs[symbol][[1]];
+    n24d = configs[symbol][[2]];
+
+    n1 = getComplex[n14d];
+    n2 = getComplex[n24d];
+
+    Print[n1//N];
+    Print[n2//N];
+
+    r1 = getGeneratorMatrix[p1, n1/Norm[n1]];
+    r2 = getGeneratorMatrix[p2, n2/Norm[n2]];
+
+    Print[r1//N];
+    Print[r2//N];
+
+    seed = {{n2[[2]]}, {-n2[[1]]}};
+
+
+    qDisplayString = getQString[q, "/"];
+    qFileString = getQString[q, "over"];
+
+    shape = getShapeName[symbol];
+    shapeFile = getFileName[symbol];
+    Print["-----"];
+    Print["Shape: " <> shape];
+
+    edgeGenerators = {r1};
+
+    generators = {r1, r2};
+
+    edge1 = { seed };
+
+    lastElementCount = 0;
+
+    For[iteration=1, iteration <= p1 - 1, iteration++,
+        AppendTo[edge1, r1.edge1[[Length[edge1]]]];
+    ];
+
+    edge1 = edge1//Simplify//ExpToTrig;
+
+(* why do we get these? It's not the most symmetric form *)
+(* {{{0. + 2.73205 I}, {-1. - 1. I}}, {{-1. + 1. I}, {-2.36603 - 1.36603 I}}, {{1. + 1. I}, {-1.36603 - 2.36603 I}}} *)
+(* {{{0. + 2.73205 I}, {-1. - 1. I}}, {{0. + 2.73205 I}, {1.36603 - 0.366025 I}}, {{0. + 2.73205 I}, {-0.366025 + 1.36603 I}}} *)
+
+
+    Print[" Each edge contains " <> IntegerString[Length[edge1]] <> " vertices."];
+    If[Length[edge1] != p1 , Print["Error"]; Abort[]];
+
+    edges = { edge1 };
+    lastEdgeCount = 0;
+
+    For[iteration=1, iteration <= iterationLimit && lastEdgeCount != Length[edges], iteration++,
+        lastEdgeCount = Length[edges];
+        For[i=1, i<=Length[generators], i++,
+            newElements = Map[(generators[[i]].#)&, edges, {2}];
+            edges = Union[edges, newElements, SameTest -> SameTotal]//Simplify//ExpToTrig;
+        ];
+    ];
+
+    (* edges = Map[half.# &, edges, {2}]; *)
+
+    vertices = Union[Flatten[edges, 1], SameTest -> SameMatrix]//FullSimplify;
+
+    Print["Validating..."];
+
+    edgeCounts = {};
+    For[i=1, i<=Length[vertices], i++,
+        vertex = vertices[[i]];
+        edgeCountContainingVertex = Length[Select[edges, Length[Intersection[#, {vertex}, SameTest -> SameMatrix]] > 0 &]];
+        AppendTo[edgeCounts, edgeCountContainingVertex];
+    ];
+
+    uniqueEdgeCounts = Union[edgeCounts];
+    If[Length[uniqueEdgeCounts] == 1, 
+            Print[" Every vertex belongs to " <> IntegerString[uniqueEdgeCounts[[1]]] <> " complex edges. "];
+            If[uniqueEdgeCounts[[1]] != p2, Abort[]],
+        
+        Print["Error. The complex polytope is not regular. The edge counts are " <> ToString[edgeCounts]]; Abort[]
+    ];
+
+    Print["Vertex count: " <> IntegerString[Length[vertices]] <> " Edge count: " <> IntegerString[Length[edges]] ];
+
+    realVertices = Map[getReal, vertices];
+    realEdges = Map[getReal, edges, {2}];
+
+    Print[realVertices//N];
+
+(*     Print["Computing min norm rotation"];
+    dimension4th = {x1, x2, x3, x4}/.NMinimize[ {maxNorm[{x1, x2, x3, x4}, realVertices], {x1, x2, x3, x4}.{x1, x2, x3, x4} <= 1 }, {x1, x2, x3, x4}][[2]];
+    rot4th = Transpose[RotationMatrix[{dimension4th, {0, 0, 0, 1}}]];
+    realVertices3d = Transpose[Transpose[realVertices.rot4th][[1;;3]]];
+    realEdges3d = Map[(#.Transpose[Transpose[rot4th][[1;;3]]])&, realEdges];
+    
+    closestDist = 10000;
+    dimension3rd = {};
+    For[i = 1, i<=Length[realEdges3d], i++,
+        edgeCenter = Total[realEdges3d[[i]]]/Length[realEdges3d[[i]]];
+        norm = Norm[edgeCenter];
+        If[norm < closestDist,
+            closestDist = norm;
+            dimension3rd = edgeCenter;
+        ];
+    ];
+    
+    (* dimension3rd = {x1, x2, x3}/.NMinimize[ {maxNorm[{x1, x2, x3}, realVertices3d], {x1, x2, x3}.{x1, x2, x3}<=1}, {x1, x2, x3}][[2]]; *)
+    rot3rd = Transpose[RotationMatrix[{dimension3rd, {0, 0, 1}}]];
+    rot3rd4D = ArrayFlatten[{{rot3rd, 0},{0, 1}}];
+    realVertices2d = Transpose[Transpose[realVertices3d.rot3rd][[1;;2]]];
+    dimension2nd = {x1, x2}/.NMinimize[ {maxNorm[{x1, x2}, realVertices2d], {x1, x2}.{x1, x2} <= 1}, {x1, x2}][[2]];
+    rot2nd = Transpose[RotationMatrix[{dimension2nd, {0, 1}}]];
+    rot2nd4D = ArrayFlatten[{{rot2nd, 0}, {0, IdentityMatrix[2]}}];
+    rot4D = rot4th.rot3rd4D.rot2nd4D;
+    rotatedRealVertices = realVertices.rot4D;
+    rotatedRealEdges = Map[#.rot4D&, realEdges];
+ *)
+
+(*     dataFolder = "data";
+    dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
+
+    dataObject = <|
+        "seed" -> seed,
+        "r1" -> r1,
+        "r2" -> r2,
+        "symbol" -> symbol,
+        "vertices" -> vertices,
+        "edges" -> edges,
+        "rotatedRealVertices" -> rotatedRealVertices,
+        "rotatedRealEdges" -> rotatedRealEdges
+    |>; *)
+
+    (* If[FileExistsQ[dataFileName], DeleteFile[dataFileName]]; *)
+    (* Save[dataFileName, dataObject]; *)
+    (* Print["Saved cells to " <> dataFileName]; *)
+];
