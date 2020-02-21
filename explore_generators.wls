@@ -292,8 +292,10 @@ face center, mid point between (0,0,0,1) to (1,0,0,0). (1,0,0,1)/Sqrt[2]
 inner prod: 1/Sqrt[2]. Correct.
 
 3{5}3: based on 600-cell. vertex and a triangle.
-vertex: (1,0,0,0)
-face: (1,0,0,0), (phi, 1, 1/phi, 0)/2, (phi, 1, -1/phi, 0)/2 
+vertex: {1,0,0,0}
+face: 
+{1,0,0,0}, {phi, 1, 1/phi, 0}/2, {phi, 1, -1/phi, 0}/2
+{1,0,0,0}, {phi, 0, 1, 1/phi}/2, {phi, -1, 1/phi, 0}/2
 normalized face center: {1 + phi, 1, 0, 0}/Sqrt[1+(1+phi)^2]
 inner prod:
 Sqrt[(3 + Sqrt[5])/6]
@@ -368,7 +370,15 @@ y = Cos[ArcCos[Sqrt[(3 + Sqrt[5])/6]]/2]
 x = Sqrt[2 + Sqrt[(2*(3 + Sqrt[5]))/3]]/2
 Same.
 
+4{6}2
 
+
+
+5{6}2
+
+4{4}3
+
+5{4}3
 
 
 *)
