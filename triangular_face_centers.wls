@@ -1,53 +1,10 @@
 #!/usr/bin/env wolframscript
 
-symbols = {
-    {3, 4, 2}
-    , {2, 4, 3}
-    , {4, 4, 2}
-    , {2, 4, 4}
-    , {5, 4, 2}
-    , {2, 4, 5}
-    , {6, 4, 2}
-    , {2, 4, 6}
-
-    , {3, 3, 3}
-
-    , {3, 6, 2}
-    , {2, 6, 3}
-
-    , {3, 4, 3}
-    , {4, 3, 4}
-
-    , {3, 8, 2}
-    , {2, 8, 3}
-
-    , {4, 6, 2}
-    , {2, 6, 4}
-
-    , {4, 4, 3}
-    , {3, 4, 4}
-
-    , {3, 5, 3}
-
-    , {5, 3, 5}
-
-    , {3, 10, 2}
-    , {2, 10, 3}
-
-    , {5, 6, 2}
-    , {2, 6, 5}
-
-    , {5, 4, 3}
-    , {3, 4, 5}
-    
-    (* starry *)
-    , {3, 3, 2}
-    , {3, 5/2, 3}
-    , {5, 5/2, 5}
-    , {5, 3, 2}
+symbols = { 
+    {2, 6, 3},
+    {2, 8, 3}, 
+    {2, 10, 3} 
 };
-
-symbols = { {2, 10, 3} };
 
 epsilon = 0.00001;
 
@@ -203,11 +160,20 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     faceCenters2 = Map[Total[#]/Length[#]&, faces2];
     faceCenters2 = faceCenters2/Norm[faceCenters2[[1]]] * norm;
 
+    Print["Unique face center counts:"];
+    Print[{Length[faceCenters1], Length[faceCenters2]}];
+    (* 32 for 2{6}3 *)
+    (* 96 for 2{8}3 *)
+    (* 1200 for 2{10}3 *)
+
     vertices2AsFaceCenters1 = Intersection[vertices2, faceCenters1, SameTest -> SameMatrix];
     vertices1AsFaceCenters2 = Intersection[vertices1, faceCenters2, SameTest -> SameMatrix];
 
     Print["vertices as the face centers of the other group:"];
     Print[{Length[vertices2AsFaceCenters1], Length[vertices1AsFaceCenters2]}];
+    (* 8 for 2{6}3 *)
+    (* 24 for 2{8}3 *)
+    (* 120 for 2{10}3 *)
 
     If[Length[vertices2AsFaceCenters1] == Length[vertices2] 
         && Length[vertices1AsFaceCenters2] == Length[vertices1],
