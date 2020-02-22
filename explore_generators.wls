@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {3, 10, 2} };
+symbols = { {5, 4, 3} };
 
 epsilon = 0.00001;
 
@@ -365,20 +365,68 @@ faceCenter= {1 + phi, 1, 0, 0}/Sqrt[1+(1+phi)^2]/.phi->GoldenRatio;
 mid = (vertex + faceCenter);
 mid = mid/Norm[mid]//FullSimplify;
 x = mid.vertex
-0.983405
+0.9834053993554022
 y = Cos[ArcCos[Sqrt[(3 + Sqrt[5])/6]]/2]
 x = Sqrt[2 + Sqrt[(2*(3 + Sqrt[5]))/3]]/2
 Same.
 
 4{6}2
+Truncated 4{3}4
+sigma = Pi/8
+Cos[Pi/8]
+0.9238795325112867
 
-
+from 4{3}4:
+vertex= {0,0,0,1};
+faceCenter= {1,0,0,1}/Sqrt[2];
+mid = (vertex + faceCenter);
+mid = mid/Norm[mid]//FullSimplify;
+x = mid.vertex
+x = Sqrt[2 + Sqrt[2]]/2
+0.9238795325112867
+Correct.
 
 5{6}2
+Truncated 5{3}5
+cos sigma = Cos[ArcCos[Sqrt[(5 + Sqrt[5])/10]]/2]
+0.9619383577839175
+
+phi = GoldenRatio;
+face = {
+ {phi, 1, 1/phi, 0}/2,
+ {phi, 1, -1/phi, 0}/2,
+ {phi, 0, 1, 1/phi}/2,
+ {phi, 0, -1, 1/phi}/2,
+ {phi, -1/phi, 0, 1}/2
+};
+vertex =  {phi, -1/phi, 0, 1}/2;
+faceCenter = Total[face]/Norm[Total[face]]//FullSimplify                                                       
+mid = (vertex + faceCenter);
+mid = mid/Norm[mid]//FullSimplify;
+x = mid.vertex
+x: Sqrt[2 + Sqrt[2 + 2/Sqrt[5]]]/2
+0.9619383577839176
+
+matches y = Cos[ArcCos[Sqrt[(5 + Sqrt[5])/10]]/2]
+
+
 
 4{4}3
+cos sigma
+Cos[ArcSec[Sqrt[3]]/2]
+0.8880738339771153
+
+this is identical to the inner product of 3{6}2, which is between
+the vertex = (0, 0, 0, 1).
+and the middle point = {1/Sqrt[3], 1/Sqrt[3], 0, 1/Sqrt[3] + 1}/(its norm)
+
+
 
 5{4}3
+cos sigma = Cos[ArcCos[Sqrt[(5 + 2*Sqrt[5])/15]]/2]
+0.9472735804116376
+
+
 
 
 *)
