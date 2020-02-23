@@ -113,3 +113,24 @@ Print[Length[Intersection[v362, v443, SameTest -> SameMatrix]]];
 Print[Length[Intersection[v263, v344, SameTest -> SameMatrix]]];
 (* 4: 4 vertices of 263 are in 362. all 362 are in 344 *)
 
+(* 
+compute the edge length (1d real) over norm:
+e1=realEdges[[1]];
+(e1[[1]]-e1[[2]]//Norm)/Norm[e1[[1]]]
+
+4{4}3:
+0.650115
+
+2{6}3:
+0.919402
+
+which is 0.650115 * Sqrt[2]
+
+3{6}2:
+0.796225
+
+3{4}4:
+0.796225
+same.
+
+*)
