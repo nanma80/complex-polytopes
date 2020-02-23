@@ -420,6 +420,23 @@ this is identical to the inner product of 3{6}2, which is between
 the vertex = (0, 0, 0, 1).
 and the middle point = {1/Sqrt[3], 1/Sqrt[3], 0, 1/Sqrt[3] + 1}/(its norm)
 
+Start from 2{6}3:
+vertices of 2{6}3 contain 
+(1) eight 16-cell vertices like (0, 0, 0, 1) 
+(2) eight 16-cell face centers, rescaled, like (1, 1, 0, 1)/Sqrt[3]
+These two points will be the diagonal of the square face.
+All 16 vertices of 2{6}3 become 16 out of 96 vertices of 4{4}3.
+mid = (1, 1, 0, 1 + Sqrt[3])/norm
+
+rescale by 2 Sqrt[3], we have the following 3 edges passing {0,0,0,2 Sqrt[3]}:
+
+edges = {
+{{0, 0, 0, 2*Sqrt[3]}, {2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {2, 2, 0, 2}, {0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}},
+{{0, 0, 0, 2*Sqrt[3]}, {1 - Sqrt[3], -2, 0, 1 + Sqrt[3]}, {0, -2, -2, 2}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}},
+{{0, 0, 0, 2*Sqrt[3]}, {0, -1 + Sqrt[3], 2, 1 + Sqrt[3]}, {-2, 0, 2, 2}, {-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]}}
+};
+centers = {{1, 1, 0, 1 + Sqrt[3]}, {0, -1, -1, 1 + Sqrt[3]}, {-1, 0, 1, 1 + Sqrt[3]}};
+
 
 
 5{4}3
