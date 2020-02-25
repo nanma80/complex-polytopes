@@ -1,6 +1,110 @@
 (* following the script of rotate_263.wls *)
 (* snappedEdges are for 443 *)
+snappedEdges =
+{{{2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {1, -1, 1, 3}, {-1 + Sqrt[3], -1 - Sqrt[3], 0, 2}, {Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}},
+ {{1 + Sqrt[3], 0, -1 + Sqrt[3], 2}, {Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}, {2, -1 - Sqrt[3], 0, -1 + Sqrt[3]}, {3, -1, -1, 1}},
+ {{2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {2, 2, 0, 2}, {0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}, {0, 0, 0, 2*Sqrt[3]}},
+ {{1 + Sqrt[3], 0, -1 + Sqrt[3], 2}, {Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {0, -1 + Sqrt[3], 2, 1 + Sqrt[3]}, {1, -1, 1, 3}},
+ {{2, 2, 0, 2}, {2, 1 + Sqrt[3], -1 + Sqrt[3], 0}, {0, 2*Sqrt[3], 0, 0}, {0, 1 + Sqrt[3], 1 - Sqrt[3], 2}},
+ {{1, -1, 1, 3}, {0, 1 - Sqrt[3], 1 + Sqrt[3], 2}, {-Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}, {1 - Sqrt[3], -2, 0, 1 + Sqrt[3]}},
+ {{3, -1, -1, 1}, {1 + Sqrt[3], -2, 0, 1 - Sqrt[3]}, {Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}, {2, 1 - Sqrt[3], -1 - Sqrt[3], 0}},
+ {{Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {1 + Sqrt[3], 2, 1 - Sqrt[3], 0}, {1, 3, -1, -1}, {0, 1 + Sqrt[3], -2, -1 + Sqrt[3]}},
+ {{Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {0, 1 + Sqrt[3], 1 - Sqrt[3], 2}, {-1, 1, -1, 3}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}},
+ {{Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {-1 + Sqrt[3], 1 + Sqrt[3], 2, 0}, {-1, 3, 1, 1}, {0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}},
+ {{Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {3, -1, -1, 1}, {1 + Sqrt[3], -1 + Sqrt[3], -2, 0}},
+ {{1 + Sqrt[3], 0, 2, -1 + Sqrt[3]}, {1, 1, 3, 1}, {0, 1 - Sqrt[3], 1 + Sqrt[3], 2}, {Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}},
+ {{-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}, {0, 0, 0, 2*Sqrt[3]}, {1 - Sqrt[3], -2, 0, 1 + Sqrt[3]}, {0, -2, -2, 2}},
+ {{2*Sqrt[3], 0, 0, 0}, {1 + Sqrt[3], 0, 2, -1 + Sqrt[3]}, {2, -2, 2, 0}, {1 + Sqrt[3], -2, 0, 1 - Sqrt[3]}},
+ {{2*Sqrt[3], 0, 0, 0}, {1 + Sqrt[3], 2, 1 - Sqrt[3], 0}, {2, 2, 0, 2}, {1 + Sqrt[3], 0, -1 + Sqrt[3], 2}},
+ {{0, 0, 0, 2*Sqrt[3]}, {0, -1 + Sqrt[3], 2, 1 + Sqrt[3]}, {-2, 0, 2, 2}, {-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]}},
+ {{Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}, {0, -2, 1 + Sqrt[3], -1 + Sqrt[3]}, {-1, -3, 1, 1}, {-1 + Sqrt[3], -1 - Sqrt[3], 0, 2}},
+ {{Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {2, -1 - Sqrt[3], 0, -1 + Sqrt[3]}, {1, -3, -1, -1},
+  {-1 + Sqrt[3], -2, -1 - Sqrt[3], 0}}, {{1 + Sqrt[3], 2, 1 - Sqrt[3], 0}, {3, 1, 1, -1}, {2, -1 + Sqrt[3], 0, -1 - Sqrt[3]},
+  {Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}}, {{0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}, {-Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]},
+  {-1 - Sqrt[3], -1 + Sqrt[3], 0, 2}, {-1, 1, -1, 3}}, {{1 + Sqrt[3], -1 + Sqrt[3], -2, 0}, {Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, 
+  {0, 2, -1 - Sqrt[3], 1 - Sqrt[3]}, {1, 1, -3, 1}}, {{1 + Sqrt[3], -1 + Sqrt[3], -2, 0}, {2*Sqrt[3], 0, 0, 0},
+  {1 + Sqrt[3], 1 - Sqrt[3], 0, -2}, {2, 0, -2, -2}}, {{0, -1 + Sqrt[3], 2, 1 + Sqrt[3]}, {1, 1, 3, 1},
+  {1 - Sqrt[3], 2, 1 + Sqrt[3], 0}, {-Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}}, {{2, -1 - Sqrt[3], 0, -1 + Sqrt[3]}, {2, -2, 2, 0},
+  {0, -1 - Sqrt[3], 2, 1 - Sqrt[3]}, {0, -2*Sqrt[3], 0, 0}}, {{0, 1 + Sqrt[3], 1 - Sqrt[3], 2}, {-1, 3, 1, 1},
+  {-1 - Sqrt[3], 2, 0, -1 + Sqrt[3]}, {-Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}},
+ {{2, 1 + Sqrt[3], -1 + Sqrt[3], 0}, {Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}, {-1 + Sqrt[3], 2, 0, -1 - Sqrt[3]}, {1, 3, -1, -1}},
+ {{2, 1 + Sqrt[3], -1 + Sqrt[3], 0}, {Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {1 + Sqrt[3], 0, 2, -1 + Sqrt[3]}, {3, 1, 1, -1}},
+ {{3, 1, 1, -1}, {2, 0, 1 + Sqrt[3], 1 - Sqrt[3]}, {Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {1 + Sqrt[3], 1 - Sqrt[3], 0, -2}},
+ {{1, 1, -3, 1}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}, {Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {2, 1 - Sqrt[3], -1 - Sqrt[3], 0}},
+ {{-1, 1, -1, 3}, {-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {1 - Sqrt[3], 0, -1 - Sqrt[3], 2}},
+ {{1, 1, -3, 1}, {0, 1 + Sqrt[3], -2, -1 + Sqrt[3]}, {-Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {1 - Sqrt[3], 0, -1 - Sqrt[3], 2}},
+ {{2, 1 - Sqrt[3], -1 - Sqrt[3], 0}, {2, 0, -2, -2}, {0, -1 + Sqrt[3], -1 - Sqrt[3], -2}, {0, 0, -2*Sqrt[3], 0}},
+ {{0, 1 - Sqrt[3], 1 + Sqrt[3], 2}, {0, 0, 2*Sqrt[3], 0}, {-2, -1 + Sqrt[3], 1 + Sqrt[3], 0}, {-2, 0, 2, 2}},
+ {{1 + Sqrt[3], -2, 0, 1 - Sqrt[3]}, {Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {0, -1 - Sqrt[3], -1 + Sqrt[3], -2}, {1, -3, -1, -1}}, 
+ {{1 - Sqrt[3], -2, 0, 1 + Sqrt[3]}, {-1, -3, 1, 1}, {-2, -1 - Sqrt[3], 1 - Sqrt[3], 0}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}},
+ {{0, -2, -2, 2}, {-1 + Sqrt[3], -1 - Sqrt[3], 0, 2}, {0, -2*Sqrt[3], 0, 0}, {1 - Sqrt[3], -1 - Sqrt[3], -2, 0}},
+ {{2, 0, 1 + Sqrt[3], 1 - Sqrt[3]}, {0, 0, 2*Sqrt[3], 0}, {0, -2, 1 + Sqrt[3], -1 + Sqrt[3]}, {2, -2, 2, 0}},
+ {{0, 1 + Sqrt[3], -2, -1 + Sqrt[3]}, {0, 2*Sqrt[3], 0, 0}, {-2, 1 + Sqrt[3], 0, 1 - Sqrt[3]}, {-2, 2, -2, 0}},
+ {{-1 + Sqrt[3], 1 + Sqrt[3], 2, 0}, {1, 1, 3, 1}, {2, 0, 1 + Sqrt[3], 1 - Sqrt[3]}, {Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}},
+ {{1 + Sqrt[3], 1 - Sqrt[3], 0, -2}, {1, -1, 1, -3}, {0, -2, 1 - Sqrt[3], -1 - Sqrt[3]}, {Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}},
+ {{-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]}, {-Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}, {-1 - Sqrt[3], -2, -1 + Sqrt[3], 0}, {-3, -1, -1, 1}}, 
+ {{-1 + Sqrt[3], -2, -1 - Sqrt[3], 0}, {0, 0, -2*Sqrt[3], 0}, {1 - Sqrt[3], 0, -1 - Sqrt[3], 2}, {0, -2, -2, 2}},
+ {{0, -2, 1 + Sqrt[3], -1 + Sqrt[3]}, {-1, -1, 3, -1}, {-1 - Sqrt[3], 1 - Sqrt[3], 2, 0}, {-Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}},
+ {{-1 + Sqrt[3], -2, -1 - Sqrt[3], 0}, {Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}, {0, 1 - Sqrt[3], -2, -1 - Sqrt[3]},
+  {-1, -1, -3, -1}}, {{0, 2*Sqrt[3], 0, 0}, {-1 + Sqrt[3], 1 + Sqrt[3], 2, 0}, {0, 2, 2, -2}, {1 - Sqrt[3], 1 + Sqrt[3], 0, -2}},
+ {{1, 3, -1, -1}, {1 - Sqrt[3], 1 + Sqrt[3], 0, -2}, {-Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, {0, 2, -1 - Sqrt[3], 1 - Sqrt[3]}},
+ {{-1, 3, 1, 1}, {1 - Sqrt[3], 2, 1 + Sqrt[3], 0}, {-Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}, {-2, 1 + Sqrt[3], 0, 1 - Sqrt[3]}},
+ {{Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, {-1 + Sqrt[3], 2, 0, -1 - Sqrt[3]}, {-1, 1, -1, -3},
+  {0, -1 + Sqrt[3], -1 - Sqrt[3], -2}}, {{-Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {-1 - Sqrt[3], -1 + Sqrt[3], 0, 2},
+  {-3, -1, -1, 1}, {-2, 0, -1 - Sqrt[3], -1 + Sqrt[3]}}, {{Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]},
+  {-1 + Sqrt[3], 0, 1 + Sqrt[3], -2}, {1, -1, 1, -3}, {2, -1 + Sqrt[3], 0, -1 - Sqrt[3]}},
+ {{-Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {-2, -1 + Sqrt[3], 1 + Sqrt[3], 0}, {-3, 1, 1, -1}, {-1 - Sqrt[3], 2, 0, -1 + Sqrt[3]}},
+ {{2, 0, -2, -2}, {2, -1 + Sqrt[3], 0, -1 - Sqrt[3]}, {0, 0, 0, -2*Sqrt[3]}, {0, 1 - Sqrt[3], -2, -1 - Sqrt[3]}},
+ {{0, 0, -2*Sqrt[3], 0}, {0, 2, -1 - Sqrt[3], 1 - Sqrt[3]}, {-2, 2, -2, 0}, {-2, 0, -1 - Sqrt[3], -1 + Sqrt[3]}},
+ {{Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {-1 + Sqrt[3], 0, 1 + Sqrt[3], -2}, {-1, -1, 3, -1}, {0, -1 - Sqrt[3], 2, 1 - Sqrt[3]}},
+ {{1, -3, -1, -1}, {0, -2, 1 - Sqrt[3], -1 - Sqrt[3]}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]},
+  {1 - Sqrt[3], -1 - Sqrt[3], -2, 0}}, {{-1, -3, 1, 1}, {0, -1 - Sqrt[3], 2, 1 - Sqrt[3]}, {-Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, 
+  {-1 - Sqrt[3], -2, -1 + Sqrt[3], 0}}, {{0, -2*Sqrt[3], 0, 0}, {0, -1 - Sqrt[3], -1 + Sqrt[3], -2}, {-2, -2, 0, -2},
+  {-2, -1 - Sqrt[3], 1 - Sqrt[3], 0}}, {{1 - Sqrt[3], 2, 1 + Sqrt[3], 0}, {0, 0, 2*Sqrt[3], 0}, {-1 + Sqrt[3], 0, 1 + Sqrt[3], -2}, 
+  {0, 2, 2, -2}}, {{-1 - Sqrt[3], -1 + Sqrt[3], 0, 2}, {-2, 0, 2, 2}, {-1 - Sqrt[3], 1 - Sqrt[3], 2, 0}, {-2*Sqrt[3], 0, 0, 0}},
+ {{-2, 0, -1 - Sqrt[3], -1 + Sqrt[3]}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {1 - Sqrt[3], -1 - Sqrt[3], -2, 0},
+  {-1, -1, -3, -1}}, {{-1 + Sqrt[3], 2, 0, -1 - Sqrt[3]}, {0, 2, 2, -2}, {1 - Sqrt[3], 0, 2, -1 - Sqrt[3]}, {0, 0, 0, -2*Sqrt[3]}}, 
+ {{-2, 2, -2, 0}, {-1 - Sqrt[3], 2, 0, -1 + Sqrt[3]}, {-2*Sqrt[3], 0, 0, 0}, {-1 - Sqrt[3], 0, -2, 1 - Sqrt[3]}},
+ {{0, -1 + Sqrt[3], -1 - Sqrt[3], -2}, {-Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, {-1 - Sqrt[3], 0, -2, 1 - Sqrt[3]},
+  {-1, -1, -3, -1}}, {{1, -1, 1, -3}, {1 - Sqrt[3], 0, 2, -1 - Sqrt[3]}, {-Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]},
+  {0, -1 - Sqrt[3], -1 + Sqrt[3], -2}}, {{-2, 1 + Sqrt[3], 0, 1 - Sqrt[3]}, {-3, 1, 1, -1}, {-1 - Sqrt[3], 0, 1 - Sqrt[3], -2},
+  {-Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}}, {{1 - Sqrt[3], 1 + Sqrt[3], 0, -2}, {-Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]},
+  {-2, 0, -1 + Sqrt[3], -1 - Sqrt[3]}, {-1, 1, -1, -3}}, {{0, 1 - Sqrt[3], -2, -1 - Sqrt[3]}, {-1, 1, -1, -3},
+  {-1 - Sqrt[3], 0, 1 - Sqrt[3], -2}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}},
+ {{0, -2, 1 - Sqrt[3], -1 - Sqrt[3]}, {0, 0, 0, -2*Sqrt[3]}, {-2, 0, -1 + Sqrt[3], -1 - Sqrt[3]}, {-2, -2, 0, -2}},
+ {{-Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}, {-2, -1 + Sqrt[3], 1 + Sqrt[3], 0}, {-1, -1, 3, -1}, {1 - Sqrt[3], 0, 2, -1 - Sqrt[3]}},
+ {{-1 - Sqrt[3], 0, -2, 1 - Sqrt[3]}, {-3, -1, -1, 1}, {-2, -1 - Sqrt[3], 1 - Sqrt[3], 0},
+  {-Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}}, {{-3, 1, 1, -1}, {-1 - Sqrt[3], 1 - Sqrt[3], 2, 0},
+  {-Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {-2, 0, -1 + Sqrt[3], -1 - Sqrt[3]}},
+ {{-1 - Sqrt[3], 0, 1 - Sqrt[3], -2}, {-2*Sqrt[3], 0, 0, 0}, {-1 - Sqrt[3], -2, -1 + Sqrt[3], 0}, {-2, -2, 0, -2}}};
 
+snappedVertices =
+{{2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {1 + Sqrt[3], 0, -1 + Sqrt[3], 2}, {2, 2, 0, 2}, {1, -1, 1, 3}, {3, -1, -1, 1},
+ {Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]}, {Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {2*Sqrt[3], 0, 0, 0},
+ {1 + Sqrt[3], 0, 2, -1 + Sqrt[3]}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}, {0, 0, 0, 2*Sqrt[3]},
+ {Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]}, {Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {1 + Sqrt[3], 2, 1 - Sqrt[3], 0},
+ {0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}, {1 + Sqrt[3], -1 + Sqrt[3], -2, 0}, {0, -1 + Sqrt[3], 2, 1 + Sqrt[3]},
+ {-1 + Sqrt[3], -1 - Sqrt[3], 0, 2}, {2, -1 - Sqrt[3], 0, -1 + Sqrt[3]}, {0, 1 + Sqrt[3], 1 - Sqrt[3], 2},
+ {2, 1 + Sqrt[3], -1 + Sqrt[3], 0}, {3, 1, 1, -1}, {1, 1, -3, 1}, {-1, 1, -1, 3}, {1, 1, 3, 1}, {2, 1 - Sqrt[3], -1 - Sqrt[3], 0},
+ {0, 1 - Sqrt[3], 1 + Sqrt[3], 2}, {1 + Sqrt[3], -2, 0, 1 - Sqrt[3]}, {2, -2, 2, 0}, {1 - Sqrt[3], -2, 0, 1 + Sqrt[3]},
+ {0, -2, -2, 2}, {2, 0, 1 + Sqrt[3], 1 - Sqrt[3]}, {1 - Sqrt[3], 0, -1 - Sqrt[3], 2}, {0, 1 + Sqrt[3], -2, -1 + Sqrt[3]},
+ {-1 + Sqrt[3], 1 + Sqrt[3], 2, 0}, {1 + Sqrt[3], 1 - Sqrt[3], 0, -2}, {-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]},
+ {0, -2, 1 + Sqrt[3], -1 + Sqrt[3]}, {-1 + Sqrt[3], -2, -1 - Sqrt[3], 0}, {0, 2*Sqrt[3], 0, 0}, {-1, 3, 1, 1}, {1, 3, -1, -1},
+ {Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, {Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}, {-Sqrt[3], Sqrt[3], -Sqrt[3], Sqrt[3]},
+ {-Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}, {2, 0, -2, -2}, {0, 0, 2*Sqrt[3], 0}, {-2, 0, 2, 2}, {0, 0, -2*Sqrt[3], 0},
+ {Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]}, {Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {-Sqrt[3], -Sqrt[3], Sqrt[3], Sqrt[3]},
+ {-Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]}, {1, -3, -1, -1}, {-1, -3, 1, 1}, {0, -2*Sqrt[3], 0, 0}, {1 - Sqrt[3], 2, 1 + Sqrt[3], 0}, 
+ {0, 2, -1 - Sqrt[3], 1 - Sqrt[3]}, {2, -1 + Sqrt[3], 0, -1 - Sqrt[3]}, {-1 - Sqrt[3], -1 + Sqrt[3], 0, 2},
+ {0, -1 - Sqrt[3], 2, 1 - Sqrt[3]}, {1 - Sqrt[3], -1 - Sqrt[3], -2, 0}, {-1 + Sqrt[3], 0, 1 + Sqrt[3], -2},
+ {-2, 0, -1 - Sqrt[3], -1 + Sqrt[3]}, {-1 + Sqrt[3], 2, 0, -1 - Sqrt[3]}, {-1 - Sqrt[3], 2, 0, -1 + Sqrt[3]}, {0, 2, 2, -2},
+ {-2, 2, -2, 0}, {0, -1 + Sqrt[3], -1 - Sqrt[3], -2}, {-2, -1 + Sqrt[3], 1 + Sqrt[3], 0}, {1, -1, 1, -3}, {-1, -1, 3, -1},
+ {-3, -1, -1, 1}, {-1, -1, -3, -1}, {0, -1 - Sqrt[3], -1 + Sqrt[3], -2}, {-2, -1 - Sqrt[3], 1 - Sqrt[3], 0},
+ {1 - Sqrt[3], 1 + Sqrt[3], 0, -2}, {-2, 1 + Sqrt[3], 0, 1 - Sqrt[3]}, {-1 - Sqrt[3], 1 - Sqrt[3], 2, 0},
+ {0, 1 - Sqrt[3], -2, -1 - Sqrt[3]}, {0, -2, 1 - Sqrt[3], -1 - Sqrt[3]}, {-1 - Sqrt[3], -2, -1 + Sqrt[3], 0},
+ {-Sqrt[3], Sqrt[3], Sqrt[3], -Sqrt[3]}, {-Sqrt[3], Sqrt[3], -Sqrt[3], -Sqrt[3]}, {1 - Sqrt[3], 0, 2, -1 - Sqrt[3]},
+ {0, 0, 0, -2*Sqrt[3]}, {-2*Sqrt[3], 0, 0, 0}, {-1 - Sqrt[3], 0, -2, 1 - Sqrt[3]}, {-Sqrt[3], -Sqrt[3], -Sqrt[3], -Sqrt[3]},
+ {-Sqrt[3], -Sqrt[3], Sqrt[3], -Sqrt[3]}, {-3, 1, 1, -1}, {-1, 1, -1, -3}, {-2, -2, 0, -2}, {-1 - Sqrt[3], 0, 1 - Sqrt[3], -2},
+ {-2, 0, -1 + Sqrt[3], -1 - Sqrt[3]}};
 
 origin = {0, 0, 0, 2*Sqrt[3]};
 neighbors1=Select[snappedEdges, Length[Intersection[#, {origin}, SameTest->SameMatrix]]>0&]
@@ -84,3 +188,12 @@ orth = orth/Norm[orth]*Norm[center1]//FullSimplify;
 
 (* face4 *)
 {{-1, 0, 1, 1 + Sqrt[3]}, {-1, 1 + Sqrt[3], -1, 0}}
+
+(* all orths are centers of other faces *)
+Select[snappedEdges, Mean[#]=={1, 1, 0, 1 + Sqrt[3]}&]
+Select[snappedEdges, Mean[#]=={1, -1, 1 + Sqrt[3], 0}&]
+Select[snappedEdges, Mean[#]*(Sqrt[3]-1)=={1, -1, -2 + Sqrt[3], Sqrt[3]}&]
+Select[snappedEdges, Mean[#]*(Sqrt[3]-1)=={Sqrt[3], -2 + Sqrt[3], 1, -1}&]
+Select[snappedEdges, Mean[#]*(Sqrt[3]-1)=={2 - Sqrt[3], -1, Sqrt[3], -1}&]
+Select[snappedEdges, Mean[#]=={-1, 1 + Sqrt[3], -1, 0}&]
+
