@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-(* symbols = { {3, 8, 2} }; *)
+symbols = { {3, 4, 4}, {4, 4, 3}, {3, 4, 5}, {5, 4, 3} };
 
 exportToPov = True;
 dataFolder = "data";
@@ -56,6 +56,8 @@ imageFolder = "output";
 imageSize = {600, 450};
 
 rangeFactor = 0.8;
+epsilon = 0.0000001;
+greatestNormVertical = False;
 
 Needs["POVRayRender`"];
 ConfigurePOVRayRender["POVRayPath" -> "C:\\Program Files\\POV-Ray\\v3.7\\bin\\pvengine64.exe"];
@@ -141,28 +143,48 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
 
 	(* projectionVector4D = {Cos[theta], -Sin[theta]/5, 0,  - Sin[theta]}; *)
-    projectionVector4D = realEdges[[1]][[1]] + {0.000001, 0, 0.0000061, 0.0000021};
+    vertex1 = realEdges[[1]][[1]];
+    projectionVector4D = vertex1 + {0.000001, 0, 0.0000061, 0.0000021};
 
 	projectionTo3D = getProjectionMatrix[projectionVector4D];
 	(* projectionTo3D = getProjectionMatrix2[{1, 1, 0, 0}, {1, 0, 0, 0}]; *)
 	(* projectionTo3D = IdentityMatrix[4][[1;;3]]; *)
 
-    firstProjectionTo3D = Map[projectToDirection[#, projectionTo3D]&, realVertices];
-    maxNorm = 0;
-    maxVertexIndex = -1;
-    For[vertexIndex = 1, vertexIndex <= Length[firstProjectionTo3D], vertexIndex++,
-        If[maxNorm < Norm[firstProjectionTo3D[[vertexIndex]]],
-            maxNorm = Norm[firstProjectionTo3D[[vertexIndex]]];
-            maxVertexIndex = vertexIndex
+    incidentEdges = Select[realEdges, Length[Intersection[#, {vertex1}, SameTest -> SameMatrix]] > 0&];
+    incidentEdgeCenters = Mean/@incidentEdges;
+    Print["incident edge count: " <> ToString[incidentEdgeCenters//Length]];
+
+    If[greatestNormVertical,
+        firstProjectionTo3D = Map[projectToDirection[#, projectionTo3D]&, realVertices];
+        maxNorm = 0;
+        maxVertexIndex = -1;
+        For[vertexIndex = 1, vertexIndex <= Length[firstProjectionTo3D], vertexIndex++,
+            If[maxNorm < Norm[firstProjectionTo3D[[vertexIndex]]],
+                maxNorm = Norm[firstProjectionTo3D[[vertexIndex]]];
+                maxVertexIndex = vertexIndex
+            ];
+        ];
+
+        Print[maxNorm];
+        Print[maxVertexIndex];
+
+        viewVertical = firstProjectionTo3D[[maxVertexIndex]];
+        Print[viewVertical],
+
+        If[Length[incidentEdges] <= 2,
+            viewVertical = projectToDirection[(incidentEdgeCenters[[1]] - vertex1), projectionTo3D],
+            vector1 = projectToDirection[(incidentEdgeCenters[[1]] - vertex1), projectionTo3D];
+            vector2 = vector1;
+            For[index2 = 2, index2 <= Length[incidentEdges], index2++,
+                vector2 = projectToDirection[(incidentEdgeCenters[[index2]] - vertex1), projectionTo3D];
+                If[Abs[(vector1.vector2)/(vector1.vector1)] < 1 - 0.001,
+                    Break[];
+                ];
+            ];
+            Print["dot product: " <> ToString[InputForm[Abs[(vector1.vector2)/(vector1.vector1)]]]];
+            viewVertical = Orthogonalize[{vector1, vector2, {0.3, 510.234, 0.5}}][[3]]
         ];
     ];
-
-    Print[maxNorm];
-    Print[maxVertexIndex];
-
-    viewVertical = firstProjectionTo3D[[maxVertexIndex]];
-    Print[viewVertical];
-
 
 	projectionMatrix = RotationMatrix[- phi3d, {0, 0, 1}].RotationMatrix[{viewVertical, {0, 0, 1}}].projectionTo3D;
     (* projectionMatrix = RotationMatrix[- phi3d, viewVertical].projectionTo3D; *)
@@ -212,9 +234,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	graph = Graphics3D[
         graphElements,
-		(* ViewVertical -> viewVertical, *)
         ViewVertical -> {0, 0, 1},
-		ViewPoint -> {3, -3, 1}*3,
+		ViewPoint -> {3, -3, 1.3}*3,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
