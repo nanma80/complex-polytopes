@@ -452,6 +452,12 @@ edges = {
 };
 centers = {{1, 1, 0, 1 + Sqrt[3]}, {0, -1, -1, 1 + Sqrt[3]}, {-1, 0, 1, 1 + Sqrt[3]}};
 
+For 4{4}3, from 16-cell, the inner prod of cos(2 sigma) is between a vertex and a face center.
+from 24-cell, it can be found between:
+a vertex and 12 edges
+a face and 3 cells
+an edge and 3 vertices
+a cell and 12 faces
 
 
 5{4}3
@@ -462,44 +468,7 @@ Sqrt[(1 + Sqrt[(5 + 2*Sqrt[5])/15])/2]
 Sqrt[(15 + Sqrt[75 + 30*Sqrt[5]])/30]
 
 Cos[2*sigma]:
-cos2sigma562 = Sqrt[(5 + Sqrt[5])/10] = 0.85065080835204
 cos2sigma543 = Sqrt[(5 + 2*Sqrt[5])/15] = 0.7946544722917661
-
-ratio = cos2sigma562/cos2sigma543 == Sqrt[3]/phi, which is equal to norm[vertex]/norm[triangular face center] on a 600-cell.
-
-inner between edge center and vertex = 0.9472735804116376
-diff edge centers = 0.8459908542188225
-half angle of the last value = 0.9607265100482089
-
-phi = GoldenRatio;
-face = {
- {phi, 1, 1/phi, 0}/2,
- {phi, 1, -1/phi, 0}/2,
- {phi, 0, 1, 1/phi}/2,
- {phi, 0, -1, 1/phi}/2,
- {phi, -1/phi, 0, 1}/2
-};
-vertex =  {phi, -1/phi, 0, 1}/2;
-
-
-faceCenter = Total[face]/Norm[Total[face]]//FullSimplify                                                       
-mid = (vertex + faceCenter);
-mid = mid/Norm[mid]//FullSimplify;
-edge12 = face[[1]] + face[[2]];
-edge12=edge12/Norm[edge12]//Simplify
-
-In[86]:= edge12.faceCenter//N
-Out[86]= 0.894427
-
-In[87]:= edge12.face[[1]]//N
-Out[87]= 0.951057
-
-In[88]:= face[[2]].face[[1]]//N
-Out[88]= 0.809017
-
-In[15]:= face[[1]].faceCenter//N                                                                                                                                                 
-Out[15]= 0.850651
-
 
 face2 = {
  {phi, 1, 1/phi, 0}/2,
@@ -508,35 +477,12 @@ face2 = {
 };
 rawFaceCenter2 = Mean[face2];
 faceCenter2 = rawFaceCenter2/Norm[rawFaceCenter2]//FullSimplify
-edge212 = face2[[1]] + face2[[2]];
-edge212=edge212/Norm[edge212]//Simplify;
-1/(faceCenter2 . face2[[3]]) => 1.07047, Sqrt[3]/phi
+edgeCenter = Mean[{{phi, -1, 1/phi, 0}/2, {1, 0, 0, 0}}];
+edgeCenter = edgeCenter / Norm[edgeCenter] //Simplify;
+N[faceCenter2.edgeCenter]
+=> Sqrt[(5 + 2*Sqrt[5])/15]
 
-faceCenter.faceCenter2//N                                                                                                  
-Out[84]= 0.94642
-
-phi = GoldenRatio;
-vertices = {
- {phi, 0, -1, 1/phi}/2,
- {phi, 1, -1/phi, 0}/2,
- {phi, 1, 1/phi, 0}/2,
- {phi, 0, 1, 1/phi}/2,
- {phi, -1/phi, 0, 1}/2
-};
-origin = {1, 0, 0, 0};
-
-faceCenters = {};
-For[i=1,i<=5,i++,
-    center = Mean[{origin, vertices[[i]], vertices[[If[i+1<=5, i+1, i-4]]]}];
-    AppendTo[faceCenters, center];
-];
-faceCenters = faceCenters/Norm[faceCenters[[1]]]//Simplify;
-centerCenter = Mean[faceCenters];
-centerCenter = FullSimplify[centerCenter];
-centerCenter = centerCenter/Norm[centerCenter];
-
-In[46]:= centerCenter.faceCenters[[1]]//N                                                                                           
-Out[46]= 0.952822
+In {3,3,5}, an edge is a 5 fold axis, a face is a 3 fold axis.
 
 
 *)
