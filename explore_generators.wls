@@ -435,29 +435,33 @@ this is identical to the inner product of 3{6}2, which is between
 the vertex = (0, 0, 0, 1).
 and the middle point = {1/Sqrt[3], 1/Sqrt[3], 0, 1/Sqrt[3] + 1}/(its norm)
 
-Start from 2{6}3:
-vertices of 2{6}3 contain 
-(1) eight 16-cell vertices like (0, 0, 0, 1) 
-(2) eight 16-cell face centers, rescaled, like (1, 1, 0, 1)/Sqrt[3]
-These two points will be the diagonal of the square face.
-All 16 vertices of 2{6}3 become 16 out of 96 vertices of 4{4}3.
-mid = (1, 1, 0, 1 + Sqrt[3])/norm
+Each vertex of 2{6}3 is a 2-edge, connecting a 16-cell vertex to a face center (rescaled). 
+Equivalently, it's connecting a 24-cell center to a face center (rescaled). Only 8 cell centers are used. Only 16 edges.
+To construct 4{4}3, we use all 24 cell centers of a 24-cell. Each cell center is used in 3 edges, 24*3 = 72 edges in total.
+Each edge is a 4-edge, the cell center and a face center are diagonal vertices of the 4-edge.
+Once the diagonals are determined, the other two vertices of each 4-edge can be determined by:
 
-rescale by 2 Sqrt[3], we have the following 3 edges passing {0,0,0,2 Sqrt[3]}:
+the vector from the 4-edge center to the cell center and the vector from the 4-edge center to the new point are orthogonal,
+and the lengths are the same
+the same for another 4-edge
+the distance from two 4-edge centers to the new point is the same
 
-edges = {
-{{0, 0, 0, 2*Sqrt[3]}, {2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {2, 2, 0, 2}, {0, 2, -1 + Sqrt[3], 1 + Sqrt[3]}},
-{{0, 0, 0, 2*Sqrt[3]}, {1 - Sqrt[3], -2, 0, 1 + Sqrt[3]}, {0, -2, -2, 2}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}},
-{{0, 0, 0, 2*Sqrt[3]}, {0, -1 + Sqrt[3], 2, 1 + Sqrt[3]}, {-2, 0, 2, 2}, {-2, 1 - Sqrt[3], 0, 1 + Sqrt[3]}}
-};
-centers = {{1, 1, 0, 1 + Sqrt[3]}, {0, -1, -1, 1 + Sqrt[3]}, {-1, 0, 1, 1 + Sqrt[3]}};
+cc1 = {0, 0, 0, 2 Sqrt[3]};
+fc1 = {2, 2, 0, 2};
+cc2 = {Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]};
+fc2 = {1, -1, 1, 3};
+mid1 = (fc1 + cc1)/2//Simplify;
+mid2 = (fc2 + cc2)/2//Simplify;
 
-For 4{4}3, from 16-cell, the inner prod of cos(2 sigma) is between a vertex and a face center.
-from 24-cell, it can be found between:
-a vertex and 12 edges
-a face and 3 cells
-an edge and 3 vertices
-a cell and 12 faces
+solution = Solve[ Dot[{x1,x2,x3,x4}-mid1, fc1-mid1] == 0
+                && Dot[{x1,x2,x3,x4}-mid2, fc2-mid2] == 0
+                && Dot[{x1,x2,x3,x4}, mid1] == Dot[cc1, mid1]
+                && Dot[{x1,x2,x3,x4}, mid2] == Dot[cc2, mid2]
+                , 
+            {x1,x2,x3,x4}]
+newPoint = {x1,x2,x3,x4}/.solution//FullSimplify
+=> {{2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}}
+
 
 
 5{4}3
