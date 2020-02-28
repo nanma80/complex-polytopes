@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {3, 4, 4}, {4, 4, 3}, {3, 4, 5}, {5, 4, 3} };
+symbols = { {5, 4, 3} };
 
 exportToPov = True;
 dataFolder = "data";
@@ -197,6 +197,13 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
     positiveEdges = Select[realEdges, Total[#].projectionVector4D >= - 0.1 &];
     negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 0.1 &];
+    
+    (* 345: 25.5 or 26 *)
+    (* positiveEdges = Select[realEdges, Total[#].projectionVector4D >= 25.5 &]; *)
+    (* 543: Mean 8.5 *)
+    (* positiveEdges = Select[realEdges, Mean[#].projectionVector4D >= 8.5 &]; *)
+
+    negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 100.1 &];
     Print[{Length[positiveEdges], Length[negativeEdges]}];
     positiveEdgesEdges = Flatten[Map[getEdgesFromFace, positiveEdges], 1];
     negativeEdgesEdges = Flatten[Map[getEdgesFromFace, negativeEdges], 1];
@@ -323,7 +330,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
-    exportAnimation[symbols[[symbolIndex]], 72];
+    (* exportAnimation[symbols[[symbolIndex]], 72]; *)
     exportImage[symbol, 0, 0, 1, getFileName[symbol]];
     exportImage[symbol, 0, Pi/4, 2, getFileName[symbol]];
 ];

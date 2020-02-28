@@ -474,19 +474,62 @@ Sqrt[(15 + Sqrt[75 + 30*Sqrt[5]])/30]
 Cos[2*sigma]:
 cos2sigma543 = Sqrt[(5 + 2*Sqrt[5])/15] = 0.7946544722917661
 
-face2 = {
- {phi, 1, 1/phi, 0}/2,
- {phi, 1, -1/phi, 0}/2,
+phi=(Sqrt[5]+1)/2;
+face = {
+ {phi, 1/phi, 1, 0}/2,
+ {phi, -1/phi, 1, 0}/2,
  {1, 0, 0, 0}
 };
-rawFaceCenter2 = Mean[face2];
-faceCenter2 = rawFaceCenter2/Norm[rawFaceCenter2]//FullSimplify
-edgeCenter = Mean[{{phi, -1, 1/phi, 0}/2, {1, 0, 0, 0}}];
+faceCenter = Mean[face]/Norm[Mean[face]]//FullSimplify
+edgeCenter = Mean[{{phi, 1/phi, -1, 0}/2, {1, 0, 0, 0}}];
 edgeCenter = edgeCenter / Norm[edgeCenter] //Simplify;
-N[faceCenter2.edgeCenter]
+N[faceCenter.edgeCenter]
 => Sqrt[(5 + 2*Sqrt[5])/15]
+mid = Mean[{edgeCenter, faceCenter}];
+mid = mid/Norm[mid]//FullSimplify;
+mid.faceCenter
+Equal to: Cos[ArcCos[Sqrt[(5 + 2*Sqrt[5])/15]]/2]
 
 In {3,3,5}, an edge is a 5 fold axis, a face is a 3 fold axis.
+
+faceCenter:
+{(3 + Sqrt[5])/3, 0, 2/3, 0}
+
+edgeCenter:
+{(5 + Sqrt[5])/4, (1 + Sqrt[5])^(-1), -1/2, 0}
+
+There are diff ways to choose edge and face that result in the same inner product.
+
+phi=(Sqrt[5]+1)/2;
+face = {
+ {phi, 1/phi, 1, 0}/2,
+ {phi, -1/phi, 1, 0}/2,
+ {1, 0, 0, 0}
+};
+faceCenter = Mean[face]/Norm[Mean[face]]//FullSimplify
+edgeCenterx = Mean[{{phi, 1, 0, 1/phi}/2, {phi, 1, 0, -1/phi}/2}];
+edgeCenterx = edgeCenterx / Norm[edgeCenterx] //Simplify;
+N[faceCenter.edgeCenterx]
+midx = Mean[{edgeCenterx, faceCenter}];
+midx = midx/Norm[midx]//FullSimplify;
+midx.faceCenter//N
+
+edgeCentery = Mean[{{1, 0, phi, 1/phi}/2, {1, 0, phi, -1/phi}/2}];
+edgeCentery = edgeCentery / Norm[edgeCentery] //Simplify;
+N[faceCenter.edgeCentery]
+midy = Mean[{edgeCentery, faceCenter}];
+midy = midy/Norm[midy]//FullSimplify;
+midy.faceCenter//N
+
+edgeCenterz = Mean[{{phi, 0, 1/phi, 1}/2, {phi, 0, -1/phi, 1}/2}];
+edgeCenterz = edgeCenterz / Norm[edgeCenterz] //Simplify;
+N[faceCenter.edgeCenterz]
+
+edgeCenterx and edgeCentery are aligned with the face center. The axes of rotational
+symmetry of the face and the edge are the same: z axis.
+
+But the mid point?
+midy == {0.770582, 0., 0.637341, 0.}
 
 
 *)
