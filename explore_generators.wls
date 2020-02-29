@@ -426,6 +426,21 @@ matches y = Cos[ArcCos[Sqrt[(5 + Sqrt[5])/10]]/2]
 
 sigma562 = ArcCos[Sqrt[(5 + Sqrt[5])/10]]/2
 
+2{6}5, calculate minNorm:
+phi = GoldenRatio;
+face = {
+ {phi, 1, 1/phi, 0}/2,
+ {phi, 1, -1/phi, 0}/2,
+ {phi, 0, 1, 1/phi}/2,
+ {phi, 0, -1, 1/phi}/2,
+ {phi, -1/phi, 0, 1}/2
+};
+vertex =  {phi, 1/phi, 0, 1}/2;
+faceCenter = Total[face]/Norm[Total[face]]//FullSimplify                                                       
+Norm[faceCenter - vertex]
+=> 0.312869. As same as the minNorm from test2.wls
+
+
 4{4}3
 cos sigma
 Cos[ArcSec[Sqrt[3]]/2]
