@@ -40,7 +40,8 @@ nVector[r1_, p1_] := Module[{n1Matrix, n11, n12, epsilon},
 ];
 
 
-symbol = {3, 4, 5};
+(* symbol = {3, 4, 5}; *)
+symbol = {5, 4, 3};
 
 p1 = symbol[[1]];
 q = symbol[[2]];
@@ -65,16 +66,20 @@ realEdges = Map[getReal, complexEdges, {2}];
 
 vertex1 = realVertices[[1]];
 incidentEdges = Select[realEdges, Length[Intersection[{vertex1}, #, SameTest -> SameMatrix]] > 0 &];
+Print[incidentEdges//Length];
+normVertex = Norm[incidentEdges[[1,1]]];
+Print[vertex1];
+Print[incidentEdges[[1,1]].incidentEdges[[1,2]]/normVertex/normVertex];
 
 edgeCenters = Map[Total[#]/Norm[Total[#]]&, incidentEdges];
 Print[edgeCenters[[1]].edgeCenters[[2]]];
 Print[edgeCenters[[1]].edgeCenters[[3]]];
-Print[edgeCenters[[1]].edgeCenters[[4]]];
-Print[edgeCenters[[1]].edgeCenters[[5]]];
+(* Print[edgeCenters[[1]].edgeCenters[[4]]]; *)
+(* Print[edgeCenters[[1]].edgeCenters[[5]]]; *)
 
 Print[Norm[edgeCenters[[1]] - edgeCenters[[2]]]];
-Print[Norm[edgeCenters[[1]] - edgeCenters[[4]]]];
-Print[(Norm[edgeCenters[[1]] - edgeCenters[[2]]])/(Norm[edgeCenters[[1]] - edgeCenters[[4]]])];
+(* Print[Norm[edgeCenters[[1]] - edgeCenters[[4]]]]; *)
+(* Print[(Norm[edgeCenters[[1]] - edgeCenters[[2]]])/(Norm[edgeCenters[[1]] - edgeCenters[[4]]])]; *)
 
 incidentVertices = Union[ Flatten[incidentEdges, 1], edgeCenters, SameTest -> SameMatrix];
 incidentVertices = Map[#/Norm[#]&, incidentVertices];
@@ -96,6 +101,10 @@ Print[distinctInnerProducts];
 (* hit: *)
 (* {0.45529649865501276, 0.4999999999999978, 0.7366852097826335, 0.8090169943749466} *)
 (* 0.809: incidentEdges[[1,3]].incidentEdges[[2,3]]/Norm[incidentEdges[[1,1]]]^2 *)
+
+
+(* hit from 5{4}3 *)
+(* {0.4999999999999972, 0.5490927356975517, 0.8090169943749458, 0.8884507093343049} *)
 
 
 (* vertex1 = realVertices[[1]];
