@@ -12,7 +12,8 @@ symbols = {
     (* , {3, 5/2, 3} *)
     (* , {5, 3, 2} *)
     (* {5, 6, 2} *)
-    {5, 4, 3}
+    (* {5, 4, 3} *)
+    {3, 4, 5}
     (* {5, 3, 5} *)
 };
 
@@ -95,11 +96,18 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     (* threshold = 3.476; *)
 
     (* 543 *)
-    threshold = 2.940;
+    (* threshold = 2.940; *)
+
+(*     realVertices = Select[realVertices, #[[4]]>threshold&];
+    realEdges = Select[realEdges, #[[1]][[4]]>threshold && #[[2]][[4]]>threshold
+    && #[[3]][[4]]>threshold && #[[4]][[4]]>threshold && #[[5]][[4]]>threshold & ];
+ *)
+    (* 345 *)
+    threshold = 2.9;
 
     realVertices = Select[realVertices, #[[4]]>threshold&];
     realEdges = Select[realEdges, #[[1]][[4]]>threshold && #[[2]][[4]]>threshold
-    && #[[3]][[4]]>threshold && #[[4]][[4]]>threshold && #[[5]][[4]]>threshold & ];
+    && #[[3]][[4]]>threshold & ];
 
     Print[realEdges[[1]]];
     Print[realEdges[[2]]];
@@ -114,7 +122,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	outputFolder = FileNameJoin[{imageFolder, frameFolder}];
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
-	outputFileName = shapeFile <> "_animation_frame_cellFirst" <> IntegerString[serialNumber, 10, 4] <> ".png";
+	outputFileName = shapeFile <> "_test_min_norm_plot_" <> IntegerString[serialNumber, 10, 4] <> ".png";
 	outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
@@ -129,6 +137,14 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
             FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
         }
     };
+
+    vertices3d = Map[projectToDirection[#, projectionMatrix]&, realVertices];
+    Print[Map[{#[[3]], Arg[#[[1]] + I #[[2]]] / 2 / Pi}&, vertices3d]];
+    vertex1 = vertices3d[[5]];
+    Print[Norm/@vertices3d];
+    (* Print[vertex1//Norm]; *)
+    (* Print[vertex1]; *)
+    Print[{vertex1[[1;;2]]//Norm, vertex1[[3]]}];
 
     positiveEdges = Select[realEdges, Total[#][[4]] >= - 0.1 &];
     negativeEdges = Select[realEdges, Total[#][[4]] < - 0.1 &];
@@ -161,8 +177,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 
 	graph = Graphics3D[
         graphElements,
-        ViewVertical -> {0, 0, 1},
-		ViewPoint -> {2, -2, 1}*3,
+        ViewVertical -> {0, 1, 0},
+		ViewPoint -> {0, -0, 10}*3,
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -252,7 +268,7 @@ exportAnimation[symbol_, frameCount_] := Module[
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
     (* exportAnimation[symbols[[symbolIndex]], 72]; *)
-    exportImage[symbol, 0, 0, 1, "static_test"];
+    exportImage[symbol, 0, 0, 1, getFileName[symbol]];
     (* exportImage[symbol, 0, Pi/4, 2, "static_test"]; *)
 ];
 

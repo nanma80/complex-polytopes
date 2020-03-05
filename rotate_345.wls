@@ -103,9 +103,14 @@ Print[distinctInnerProducts];
 (* 0.809: incidentEdges[[1,3]].incidentEdges[[2,3]]/Norm[incidentEdges[[1,1]]]^2 *)
 
 
+(* 
+0.9781476007338055 == Cos[Pi/15] == Cos[12 deg], 600-cell edge angle/3
+0.8090169943749458 == Cos[Pi/5] == Cos[36 deg], 600-cell edge length
+0.5 == Cos[Pi/3] == Cos[60 deg], 600-cell distant-2 vertex neighbors
+*)
+
 (* hit from 5{4}3 *)
 (* {0.4999999999999972, 0.5490927356975517, 0.8090169943749458, 0.8884507093343049} *)
-
 
 (* vertex1 = realVertices[[1]];
 incidentEdges = Select[realEdges, Length[Intersection[{vertex1}, #, SameTest -> SameMatrix]] > 0 &];
