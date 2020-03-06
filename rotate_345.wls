@@ -8,10 +8,12 @@ iterationLimit = 20;
 dataFolder = "data";
 imageFolder = "output";
 
+getEdgesFromFace[face_] := Table[{face[[i+1]], face[[Mod[i+1, Length[face]] + 1]]}, {i, 0, Length[face] - 1}];
 sameVertex[point1_, point2_] := point1 == point2;
 cubeVertices[dimension_] := 2 * Map[IntegerDigits[#, 2][[2;;dimension+1]]&, Table[k, {k, 2^dimension, 2 * 2^dimension - 1}]] - 1;
 allPlusMinus[v_] := Union[Map[(v #)&, cubeVertices[Length[v]]]];
 SameMatrix[m1_, m2_] := ( m1 == m2 ) || (Max[Max[N[Abs[m1 - m2]]]] < epsilon);
+sameCenter[edge1_, edge2_] := SameMatrix[Total[edge1], Total[edge2]];
 SameTotal[edge1_, edge2_] := SameMatrix[Total[edge1], Total[edge2]];
 getQString[q_, separator_] := If[IntegerQ[q], IntegerString[q], IntegerString[Numerator[q]] <> separator <> IntegerString[Denominator[q]]];
 getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_" <> getQString[symbol[[2]], "over"] <> "_" <> IntegerString[symbol[[3]]];
@@ -182,22 +184,41 @@ If[isOrthogonal,
     cell600cells = Get["../star-polytope/data/polytope_3_3_5_cell600.wl"];
 
     cell600Faces = Flatten[cell600cells, 1];
+    cell600Edges = Union[ Flatten[Map[getEdgesFromFace, cell600Faces], 1], SameTest -> sameCenter];
     cell600Vertices = Union[ Flatten[cell600Faces,1], SameTest -> sameVertex];
     Print[cell600Vertices//Length]; (* 120 *)
     Print[rotatedVertices//Length]; (* 360 *)
+    Print[cell600Edges//Length]; (* 720 *)
+    Print[cell600Faces//Length]; (* 2400 because we didn't dedup *)
 
     (* 120. 3{4}5 vertices contain the 120 vertices of 600-cell *)
     Print[Intersection[N[cell600Vertices], rotatedVertices, SameTest -> SameMatrix]//Length];
 
+    otherVertices = Complement[rotatedVertices, N[cell600Vertices], SameTest -> SameMatrix];
+    Print[otherVertices//Length];
+
+    getThirds[edge1_] := {
+        Sin[2 Pi/15] edge1[[1]] + Sin[Pi/15] edge1[[2]],
+        Sin[Pi/15] edge1[[1]] + Sin[2 Pi/15] edge1[[2]]
+    }/Sin[4 Pi/5];
+
+    edgeThirds = Map[getThirds, cell600Edges];
+    selectedEdgeThirds = Select[edgeThirds, Length[Intersection[#, otherVertices, SameTest -> SameMatrix]]>0&];
+    Print[selectedEdgeThirds//Length]; (* 120 *)
+
+    selectedVertices = Flatten[selectedEdgeThirds, 1];
+    Print[selectedVertices//Length]; (* 240 *)
+    (* 240. All the other vertices match the thirds points *)
+    Print[Intersection[N[selectedVertices], otherVertices, SameTest -> SameMatrix]//Length];
 
     (* Print[rotatedVertices]; *)
     (* Print[Norm/@rotatedVertices]; *)
 
-    knownValues = Union[Flatten[theoreticalPoints]//FullSimplify];
-    (* Print[knownValues//N]; *)
-
-    snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}];
-    snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}];
+(*     knownValues = Union[Flatten[theoreticalPoints]//FullSimplify];
+    Print[knownValues//N];
+ *)
+    (* snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}]; *)
+    (* snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}]; *)
 
     (* Print[snappedVertices[[1;;20]]]; *)
     (* Print[snappedEdges[[1;;5]]]; *)

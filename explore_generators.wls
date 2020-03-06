@@ -479,7 +479,7 @@ newPoint = {x1,x2,x3,x4}/.solution//FullSimplify
 
 
 
-5{4}3
+3{4}5
 cos sigma = Cos[ArcCos[Sqrt[(5 + 2*Sqrt[5])/15]]/2]
 0.9472735804116376
 alt forms:
@@ -545,6 +545,13 @@ symmetry of the face and the edge are the same: z axis.
 
 But the mid point?
 midy == {0.770582, 0., 0.637341, 0.}
+
+3{4}5 can be constructed as follows:
+Take a 600-cell. It has 120 vertices. Take 120 out of 720 edges in a symmetric way.
+Think of each edge as an arc on 3-sphere. Divide each arc in 3 equal parts. Each edge
+has two dividing points. There are 240 dividing points in total. 120+240 points
+form the 360 points on 3{4}5.
+
 
 
 *)
