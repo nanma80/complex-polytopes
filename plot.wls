@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {3, 4, 5} };
+symbols = { {4, 4, 3} };
 
 exportToPov = True;
 dataFolder = "data";
@@ -56,7 +56,7 @@ imageFolder = "output";
 imageSize = {600, 450};
 
 (* rangeFactor = 0.8; *)
-rangeFactor = 0.4;
+rangeFactor = 0.6;
 epsilon = 0.0000001;
 greatestNormVertical = False;
 
@@ -201,7 +201,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 0.1 &];
     
     (* 345 or 543: Mean > 8.5 *)
-    positiveEdges = Select[realEdges, Mean[#].projectionVector4D >= 7.0 &];
+    (* 344 or 443: Mean > 3 *)
+    positiveEdges = Select[realEdges, Mean[#].projectionVector4D >= 3.0 &];
     negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 100.1 &];
 
     Print[{Length[positiveEdges], Length[negativeEdges]}];
@@ -333,8 +334,9 @@ exportAnimation[symbol_, frameCount_] := Module[
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
     (* exportAnimation[symbols[[symbolIndex]], 72]; *)
-    (* exportImage[symbol, 0, 0, 1, getFileName[symbol]]; *)
-    exportImage[symbol, 0, Pi/4, 3, getFileName[symbol]];
+    exportImage[symbol, 0, 0, 1, getFileName[symbol]];
+    exportImage[symbol, 0, Pi/4, 2, getFileName[symbol]];
+    (* exportImage[symbol, 0, Pi/2, 3, getFileName[symbol]]; *)
 ];
 
 
