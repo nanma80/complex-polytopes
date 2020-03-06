@@ -8,6 +8,7 @@ iterationLimit = 20;
 dataFolder = "data";
 imageFolder = "output";
 
+sameVertex[point1_, point2_] := point1 == point2;
 cubeVertices[dimension_] := 2 * Map[IntegerDigits[#, 2][[2;;dimension+1]]&, Table[k, {k, 2^dimension, 2 * 2^dimension - 1}]] - 1;
 allPlusMinus[v_] := Union[Map[(v #)&, cubeVertices[Length[v]]]];
 SameMatrix[m1_, m2_] := ( m1 == m2 ) || (Max[Max[N[Abs[m1 - m2]]]] < epsilon);
@@ -40,8 +41,8 @@ nVector[r1_, p1_] := Module[{n1Matrix, n11, n12, epsilon},
 ];
 
 
-(* symbol = {3, 4, 5}; *)
-symbol = {5, 4, 3};
+symbol = {3, 4, 5};
+(* symbol = {5, 4, 3}; *)
 
 p1 = symbol[[1]];
 q = symbol[[2]];
@@ -64,24 +65,24 @@ seed = dataObject[["seed"]];
 realVertices = Map[getReal, complexVertices];
 realEdges = Map[getReal, complexEdges, {2}];
 
-vertex1 = realVertices[[1]];
+(* vertex1 = realVertices[[1]];
 incidentEdges = Select[realEdges, Length[Intersection[{vertex1}, #, SameTest -> SameMatrix]] > 0 &];
 Print[incidentEdges//Length];
 normVertex = Norm[incidentEdges[[1,1]]];
 Print[vertex1];
 Print[incidentEdges[[1,1]].incidentEdges[[1,2]]/normVertex/normVertex];
-
-edgeCenters = Map[Total[#]/Norm[Total[#]]&, incidentEdges];
-Print[edgeCenters[[1]].edgeCenters[[2]]];
-Print[edgeCenters[[1]].edgeCenters[[3]]];
+ *)
+(* edgeCenters = Map[Total[#]/Norm[Total[#]]&, incidentEdges]; *)
+(* Print[edgeCenters[[1]].edgeCenters[[2]]]; *)
+(* Print[edgeCenters[[1]].edgeCenters[[3]]]; *)
 (* Print[edgeCenters[[1]].edgeCenters[[4]]]; *)
 (* Print[edgeCenters[[1]].edgeCenters[[5]]]; *)
 
-Print[Norm[edgeCenters[[1]] - edgeCenters[[2]]]];
+(* Print[Norm[edgeCenters[[1]] - edgeCenters[[2]]]]; *)
 (* Print[Norm[edgeCenters[[1]] - edgeCenters[[4]]]]; *)
 (* Print[(Norm[edgeCenters[[1]] - edgeCenters[[2]]])/(Norm[edgeCenters[[1]] - edgeCenters[[4]]])]; *)
 
-incidentVertices = Union[ Flatten[incidentEdges, 1], edgeCenters, SameTest -> SameMatrix];
+(* incidentVertices = Union[ Flatten[incidentEdges, 1], edgeCenters, SameTest -> SameMatrix];
 incidentVertices = Map[#/Norm[#]&, incidentVertices];
 innerProducts = {};
 For[i = 1, i<=Length[incidentVertices], i++,
@@ -95,6 +96,7 @@ For[i = 1, i<=Length[incidentVertices], i++,
 ];
 distinctInnerProducts = Union[innerProducts, SameTest -> (Abs[#1-#2] < epsilon&)];
 Print[distinctInnerProducts];
+ *)
 
 (* {0.45529649865501276, 0.4999999999999978, 0.5228511020787892, 0.6338497452485641, 0.7328667969030407, 0.7366852097826335, 0.766360424875417, 0.8090169943749466, 0.8142632253284559, 0.8459908542188238, 0.9265733799181644, 0.9290548650362505, 0.9472735804116371, 0.9781476007338055} *)
 
@@ -137,55 +139,28 @@ For[edgeIndex = 2, edgeIndex <= Length[realEdges], edgeIndex++,
 
 Print[greatestInnerProd];
  *)
-(* beforePoints = Flatten[Join[otherPoints, otherPoints2], 1];
-(* Print[Map[Norm, beforePoints]]; *)
+beforePoints = {{-2.313764388333717, 2.083322812807989, -0.1592858275051926, 0.14342160328500508},
+ {-2.3441073217849473, 1.1609761130396368, -1.2618331601939548, -1.1422581682618216},
+ {-2.47585118264818, 1.1748229507866157, 0.6518603455072836, -1.3433954607114416},
+ {-2.578827297471305, -0.4385823080235634, -0.34944196504784125, -1.6657931925030236}};
+
+(* Validate before points are indeed from realVertices. They are selected from an adhoc script *)
+Print[Length[Intersection[realVertices, beforePoints, SameTest -> SameMatrix]] == Length[beforePoints]];
+
+(* beforePoints = Flatten[Join[otherPoints, otherPoints2], 1]; *)
+Print[Map[Norm, beforePoints]];
 fourBeforePoints = beforePoints[[1;;4]];
 Print[Det[fourBeforePoints]];
 
+
 phi=(Sqrt[5]+1)/2;
-face = {
- {phi, 1/phi, 1, 0}/2,
- {phi, -1/phi, 1, 0}/2,
- {1, 0, 0, 0}
-};
-faceCenter = Mean[face]/Norm[Mean[face]]//FullSimplify
-edgeCenterx = Mean[{{phi, 1, 0, 1/phi}/2, {phi, 1, 0, -1/phi}/2}];
-edgeCenterx = edgeCenterx / Norm[edgeCenterx] //Simplify;
-N[faceCenter.edgeCenterx]
-midx = Mean[{edgeCenterx, faceCenter}];
-midx = midx/Norm[midx]//FullSimplify;
-midx.faceCenter//N
-
-edgeCentery = Mean[{{1, 0, phi, 1/phi}/2, {1, 0, phi, -1/phi}/2}];
-edgeCentery = edgeCentery / Norm[edgeCentery] //Simplify;
-N[faceCenter.edgeCentery]
-midy = Mean[{edgeCentery, faceCenter}];
-midy = midy/Norm[midy]//FullSimplify;
-midy.faceCenter//N
-
-edgeCenterz = Mean[{{phi, 0, 1/phi, 1}/2, {phi, 0, -1/phi, 1}/2}];
-edgeCenterz = edgeCenterz / Norm[edgeCenterz] //Simplify;
-N[faceCenter.edgeCenterz]
-
-
-faces = 
-{
-    {{0,0,0,1}, {1,0,0,0}, {0,1,0,0}},
-    {{0,0,0,1}, {0,-1,0,0}, {0,0,-1,0}}
-};
-
-faceCenters = Map[Total, faces];
-normFaceCenters = Norm[faceCenters[[1]]];
 
 theoreticalPoints = {
-    normFaceCenters faces[[1]][[1]],
-    normFaceCenters faces[[1]][[3]],
-    normFaceCenters faces[[1]][[2]],
-    faceCenters[[2]]
+    {phi, 1, 0, 1/phi},
+    {phi, 0, 1/phi, 1},
+    {phi, 0, -1/phi, 1},
+    {phi, -1, 0, 1/phi}
 };
-
-
-theoreticalPoints = theoreticalPoints[[1;;4]];
 
 rot4d = Inverse[fourBeforePoints].theoreticalPoints;
 
@@ -197,69 +172,47 @@ Print[isOrthogonal];
 Print["Det: "];
 Print[Det[rot4d]];
 
-If[isOrthogonal && False,
+
+
+If[isOrthogonal,
 
     rotatedVertices = realVertices.rot4d;
     rotatedEdges = Map[#.rot4d&, realEdges];
 
+    cell600cells = Get["../star-polytope/data/polytope_3_3_5_cell600.wl"];
+
+    cell600Faces = Flatten[cell600cells, 1];
+    cell600Vertices = Union[ Flatten[cell600Faces,1], SameTest -> sameVertex];
+    Print[cell600Vertices//Length]; (* 120 *)
+    Print[rotatedVertices//Length]; (* 360 *)
+
+    (* 120. 3{4}5 vertices contain the 120 vertices of 600-cell *)
+    Print[Intersection[N[cell600Vertices], rotatedVertices, SameTest -> SameMatrix]//Length];
+
+
     (* Print[rotatedVertices]; *)
+    (* Print[Norm/@rotatedVertices]; *)
 
     knownValues = Union[Flatten[theoreticalPoints]//FullSimplify];
+    (* Print[knownValues//N]; *)
 
     snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}];
     snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}];
 
-(*     Print[snappedVertices];
-    Print[snappedEdges];
- *)
-    dataObject["rot4d"] = rot4d;
-    dataObject["snappedVertices"] = snappedVertices;
-    dataObject["snappedEdges"] = snappedEdges;
-
-    (* If[FileExistsQ[dataFileName], DeleteFile[dataFileName]]; *)
-    (* Save[dataFileName, dataObject]; *)
-    (* Print["Saved data to " <> dataFileName]; *)
-
-    (* Use the same matrix to rotate 4{4}3 *)
-    symbol = {4, 4, 3};
-
-    p1 = symbol[[1]];
-    q = symbol[[2]];
-    p2 = symbol[[3]];
-
-    shape = getShapeName[symbol];
-    shapeFile = getFileName[symbol];
-
-    dataFileName = FileNameJoin[{dataFolder, shapeFile <> ".wl"}];
-
-    dataObject = Get[dataFileName];
-
-    complexVertices = dataObject[["vertices"]];
-    complexEdges = dataObject[["edges"]];
-
-    r1 = dataObject[["r1"]];
-    r2 = dataObject[["r2"]];
-    seed = dataObject[["seed"]];
-
-    realVertices = Map[getReal, complexVertices];
-    realEdges = Map[getReal, complexEdges, {2}];
-
-    rotatedVertices = realVertices.rot4d*2;
-    rotatedEdges = Map[#.rot4d*2&, realEdges];
-
-    knownValues = {0, Sqrt[3], 2 Sqrt[3]};
-    snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}];
-    snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}];
+    (* Print[snappedVertices[[1;;20]]]; *)
+    (* Print[snappedEdges[[1;;5]]]; *)
 
     (* Print[snappedVertices]; *)
     (* Print[snappedEdges]; *)
-    dataObject["rot4d"] = rot4d;
-    dataObject["snappedVertices"] = snappedVertices;
-    dataObject["snappedEdges"] = snappedEdges;
+
+    (* dataObject["rot4d"] = rot4d; *)
+    (* dataObject["snappedVertices"] = snappedVertices; *)
+    (* dataObject["snappedEdges"] = snappedEdges; *)
 
     (* If[FileExistsQ[dataFileName], DeleteFile[dataFileName]]; *)
     (* Save[dataFileName, dataObject]; *)
     (* Print["Saved data to " <> dataFileName]; *)
+
 ];
 
- *)
+

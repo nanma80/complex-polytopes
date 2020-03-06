@@ -47,7 +47,7 @@ symbols = {
     , {5, 3, 2}
 };
 
-symbols = { {5, 4, 3} };
+symbols = { {3, 4, 5} };
 
 exportToPov = True;
 dataFolder = "data";
@@ -55,7 +55,8 @@ imageFolder = "output";
 
 imageSize = {600, 450};
 
-rangeFactor = 0.8;
+(* rangeFactor = 0.8; *)
+rangeFactor = 0.4;
 epsilon = 0.0000001;
 greatestNormVertical = False;
 
@@ -138,6 +139,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	If[!DirectoryQ[outputFolder], CreateDirectory[outputFolder]];
 
 	outputFileName = shapeFile <> "_animation_frame_vertexFirst_" <> IntegerString[serialNumber, 10, 4] <> ".png";
+    outputFileName = "center_" <> outputFileName;
 	outputFileName = FileNameJoin[{outputFolder, outputFileName}];
 
 	cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
@@ -191,19 +193,17 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     
     graphElements = {
         {
-            FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
+            (* FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]] *)
         }
     };
 
     positiveEdges = Select[realEdges, Total[#].projectionVector4D >= - 0.1 &];
     negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 0.1 &];
     
-    (* 345: 25.5 or 26 *)
-    (* positiveEdges = Select[realEdges, Total[#].projectionVector4D >= 25.5 &]; *)
-    (* 543: Mean 8.5 *)
-    (* positiveEdges = Select[realEdges, Mean[#].projectionVector4D >= 8.5 &]; *)
-
+    (* 345 or 543: Mean > 8.5 *)
+    positiveEdges = Select[realEdges, Mean[#].projectionVector4D >= 7.0 &];
     negativeEdges = Select[realEdges, Total[#].projectionVector4D < - 100.1 &];
+
     Print[{Length[positiveEdges], Length[negativeEdges]}];
     positiveEdgesEdges = Flatten[Map[getEdgesFromFace, positiveEdges], 1];
     negativeEdgesEdges = Flatten[Map[getEdgesFromFace, negativeEdges], 1];
@@ -243,6 +243,8 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
         graphElements,
         ViewVertical -> {0, 0, 1},
 		ViewPoint -> {3, -3, 1.3}*3,
+        (* ViewVertical -> {0, 1, 0}, *)
+        (* ViewPoint -> {0, 0, 10}*3, *)
 		PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
 		Lighting -> lighting
 	];
@@ -331,8 +333,8 @@ exportAnimation[symbol_, frameCount_] := Module[
 For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     symbol = symbols[[symbolIndex]];
     (* exportAnimation[symbols[[symbolIndex]], 72]; *)
-    exportImage[symbol, 0, 0, 1, getFileName[symbol]];
-    exportImage[symbol, 0, Pi/4, 2, getFileName[symbol]];
+    (* exportImage[symbol, 0, 0, 1, getFileName[symbol]]; *)
+    exportImage[symbol, 0, Pi/4, 3, getFileName[symbol]];
 ];
 
 
