@@ -72,7 +72,7 @@ getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
 getProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]][[2;;4]];
 getProjectionMatrix2[direction_, direction2_] := Simplify[Orthogonalize[{direction, {0, 10, 0,  1}, direction2, {-3, 3, -5, 0}}]][[2;;4]];
 getFullProjectionMatrix[direction_] := Simplify[Orthogonalize[{direction, {0.3, 510.234, 0.5, 0}, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}]];
-perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] * (1 + point.(fullProjectionMatrix[[1]]) / wDistance);
+perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[2;;4]]] / (1 - point.(fullProjectionMatrix[[1]])/wDistance);
 
 projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
 projectTo3d[vertex4d_] := {vertex4d[[1]], vertex4d[[2]], vertex4d[[3]]};
@@ -128,7 +128,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
 	realVertices = dataObject[["rotatedRealVertices"]];
 	realEdges = dataObject[["rotatedRealEdges"]];
 
-    wDistance = Norm[realVertices[[1]]];
+    wDistance = Norm[realVertices[[1]]] * 2;
 
     edgeCenter = Total[realEdges[[1]]]/Length[realEdges[[1]]];
     projectionVector4D = edgeCenter + {0.001, 0.0013, 0.0061, 0.0021};
