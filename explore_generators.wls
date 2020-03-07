@@ -547,7 +547,8 @@ But the mid point?
 midy == {0.770582, 0., 0.637341, 0.}
 
 3{4}5 can be constructed as follows:
-Take a 600-cell. It has 120 vertices. Take 120 out of 720 edges in a symmetric way.
+Take a 600-cell. It has 120 vertices. These are 120 out of 360 vertices.
+Select 120 out of 720 edges along 12 great circles, similar to Hopf fibration.
 Think of each edge as an arc on 3-sphere. Divide each arc in 3 equal parts. Each edge
 has two dividing points. There are 240 dividing points in total. 120+240 points
 form the 360 points on 3{4}5.

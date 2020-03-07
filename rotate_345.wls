@@ -3,11 +3,23 @@
 
 numericalValue = True;
 
+exportToPov = True;
+imageSize = {600, 450};
+perspective = True;
+
+(* rangeFactor = 0.8; *)
+rangeFactor = 0.6;
+
+Needs["POVRayRender`"];
+ConfigurePOVRayRender["POVRayPath" -> "C:\\Program Files\\POV-Ray\\v3.7\\bin\\pvengine64.exe"];
+
 epsilon = 1*^-5;
 iterationLimit = 20;
 dataFolder = "data";
 imageFolder = "output";
 
+perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[1;;3]]] / (1 + point.(fullProjectionMatrix[[4]])/wDistance);
+projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
 getEdgesFromFace[face_] := Table[{face[[i+1]], face[[Mod[i+1, Length[face]] + 1]]}, {i, 0, Length[face] - 1}];
 sameVertex[point1_, point2_] := point1 == point2;
 cubeVertices[dimension_] := 2 * Map[IntegerDigits[#, 2][[2;;dimension+1]]&, Table[k, {k, 2^dimension, 2 * 2^dimension - 1}]] - 1;
@@ -180,27 +192,77 @@ If[isOrthogonal,
 
     rotatedVertices = realVertices.rot4d;
     rotatedEdges = Map[#.rot4d&, realEdges];
-
-    cell600cells = Get["../star-polytope/data/polytope_3_3_5_cell600.wl"];
-
-    cell600Faces = Flatten[cell600cells, 1];
-    cell600Edges = Union[ Flatten[Map[getEdgesFromFace, cell600Faces], 1], SameTest -> sameCenter];
-    cell600Vertices = Union[ Flatten[cell600Faces,1], SameTest -> sameVertex];
-    Print[cell600Vertices//Length]; (* 120 *)
     Print[rotatedVertices//Length]; (* 360 *)
-    Print[cell600Edges//Length]; (* 720 *)
-    Print[cell600Faces//Length]; (* 2400 because we didn't dedup *)
 
+    cell600FileName = FileNameJoin[{dataFolder, "cell600Data.wl"}];
+
+    If[!FileExistsQ[cell600FileName],
+        cell600Cells = Get["../star-polytope/data/polytope_3_3_5_cell600.wl"];
+        Print[cell600Cells//Length]; (* 600 *)
+        cell600Faces = Union[ Flatten[cell600Cells, 1], SameTest -> sameCenter];
+        Print[cell600Faces//Length]; (* 1200 *)
+        cell600Edges = Union[ Flatten[Map[getEdgesFromFace, cell600Faces], 1], SameTest -> sameCenter];
+        Print[cell600Edges//Length]; (* 720 *)
+        cell600Vertices = Union[ Flatten[cell600Faces,1], SameTest -> sameVertex];
+        Print[cell600Vertices//Length]; (* 120 *)
+
+        cell600Data = <|
+            "cells" -> cell600Cells,
+            "faces" -> cell600Faces,
+            "edges" -> cell600Edges,
+            "vertices" -> cell600Vertices
+        |>;
+
+        Save[cell600FileName, cell600Data];
+        Print["Saved 600-cell data to " <> cell600FileName];
+    ];
+
+    cell600Data = Get[cell600FileName];
+    cell600Edges = cell600Data["edges"];
+    cell600Vertices = cell600Data["vertices"];
+
+    Print["Intersection of 600-cell vertices and 3{4}5 vertices"];
     (* 120. 3{4}5 vertices contain the 120 vertices of 600-cell *)
     Print[Intersection[N[cell600Vertices], rotatedVertices, SameTest -> SameMatrix]//Length];
 
     otherVertices = Complement[rotatedVertices, N[cell600Vertices], SameTest -> SameMatrix];
+    (* 240 other vertices *)
     Print[otherVertices//Length];
+
+
+    Print["Breaking edges to 3 parts"];
 
     getThirds[edge1_] := {
         Sin[2 Pi/15] edge1[[1]] + Sin[Pi/15] edge1[[2]],
         Sin[Pi/15] edge1[[1]] + Sin[2 Pi/15] edge1[[2]]
     }/Sin[4 Pi/5];
+
+    selectedEdges = Select[cell600Edges, 
+        Length[Intersection[getThirds[#], otherVertices, SameTest -> SameMatrix]]>0&
+    ];
+    Print[selectedEdges//Length]; (* 120 *)
+    selectedEdgeEnds = Union[ Flatten[selectedEdges, 1], SameTest -> SameMatrix];
+    Print[selectedEdgeEnds//Length]; (* 120 *)
+    Print[Intersection[selectedEdgeEnds, N[cell600Vertices], SameTest -> SameMatrix]//Length]; (* 120 *)
+
+    getSegments[edge1_] := 
+    {
+        {
+            edge1[[1]],
+            (Sin[2 Pi/15] edge1[[1]] + Sin[Pi/15] edge1[[2]])/Sin[4 Pi/5]            
+        },
+        {
+            (Sin[2 Pi/15] edge1[[1]] + Sin[Pi/15] edge1[[2]])/Sin[4 Pi/5],
+            (Sin[Pi/15] edge1[[1]] + Sin[2 Pi/15] edge1[[2]])/Sin[4 Pi/5]
+        },
+        {
+            (Sin[Pi/15] edge1[[1]] + Sin[2 Pi/15] edge1[[2]])/Sin[4 Pi/5],
+            edge1[[2]]
+        }
+    };
+    selectedEdgeSegments = getSegments/@selectedEdges;
+    edgeSegments = Flatten[selectedEdgeSegments, 1];
+    Print[edgeSegments//Length]; (* 360 *)
 
     edgeThirds = Map[getThirds, cell600Edges];
     selectedEdgeThirds = Select[edgeThirds, Length[Intersection[#, otherVertices, SameTest -> SameMatrix]]>0&];
@@ -211,29 +273,85 @@ If[isOrthogonal,
     (* 240. All the other vertices match the thirds points *)
     Print[Intersection[N[selectedVertices], otherVertices, SameTest -> SameMatrix]//Length];
 
-    (* Print[rotatedVertices]; *)
-    (* Print[Norm/@rotatedVertices]; *)
+    lighting = {{"Point", White, {10, -10, 10}}};
+    range = If[perspective, 3, 1.6];
+    thickness = 0.01 * range;
 
-(*     knownValues = Union[Flatten[theoreticalPoints]//FullSimplify];
-    Print[knownValues//N];
- *)
-    (* snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}]; *)
-    (* snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}]; *)
+    projectionVector4D = {0, 0, 0, 1};
+    positiveEdgeSegments = Select[edgeSegments, Total[#].projectionVector4D >= - 0.01 &];
+    negativeEdgeSegments = Select[edgeSegments, Total[#].projectionVector4D < - 0.01 &];
+    Print[Length/@{positiveEdgeSegments, negativeEdgeSegments}];
 
-    (* Print[snappedVertices[[1;;20]]]; *)
-    (* Print[snappedEdges[[1;;5]]]; *)
+    fullProjectionMatrix = IdentityMatrix[4];
+    projectionMatrix = fullProjectionMatrix[[1;;3]];
+    wDistance = 2.01;
 
-    (* Print[snappedVertices]; *)
-    (* Print[snappedEdges]; *)
+    edges3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, edgeSegments, {2}];
+    vertices3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, selectedEdgeEnds];
+    otherVertices3D = Map[perspectiveProjection[#, fullProjectionMatrix, wDistance]&, selectedVertices];
 
-    (* dataObject["rot4d"] = rot4d; *)
-    (* dataObject["snappedVertices"] = snappedVertices; *)
-    (* dataObject["snappedEdges"] = snappedEdges; *)
+    graphElements = 
+    If[perspective,
+        {
+            {
+                FaceForm[Yellow], Map[Sphere[#, thickness * 4]&, vertices3D]
+            },
+            {
+                FaceForm[Red], Map[Sphere[#, thickness * 3]&, otherVertices3D]
+            },
+            {
+                FaceForm[Lighter[Red, 0.1]], Map[Cylinder[#, thickness * 2]&, edges3D]
+            }
+        },
+        {
+            {
+                FaceForm[Yellow], Map[Sphere[#, thickness * 4]&, Map[projectToDirection[#, projectionMatrix]&, selectedEdgeEnds]]
+            },
+            {
+                FaceForm[Lighter[Red, 0.1]], Map[Cylinder[#, thickness * 2.2]&, Map[projectToDirection[#, projectionMatrix]&, positiveEdgeSegments, {2}]]
+            },
+            {
+                Opacity[0.5], FaceForm[Blue], Map[Cylinder[#, thickness * 2]&, Map[projectToDirection[#, projectionMatrix]&, negativeEdgeSegments, {2}]]
+            }
+        }
+    ];
 
-    (* If[FileExistsQ[dataFileName], DeleteFile[dataFileName]]; *)
-    (* Save[dataFileName, dataObject]; *)
-    (* Print["Saved data to " <> dataFileName]; *)
+    frameIndexLimit = 24;
+    For[ frameIndex = 1, frameIndex <= frameIndexLimit, frameIndex++,
+        theta = Pi/2 * frameIndex / frameIndexLimit;
+        graph = Graphics3D[
+            graphElements,
+            ViewVertical -> {0, 0, 1},
+            ViewPoint -> {3 Cos[theta], - 3 Sin[theta], 1.3},
+            (* ViewVertical -> {0, 1, 0}, *)
+            (* ViewPoint -> {0, 0, 10}*3, *)
+            PlotRange -> {{-range, range}, {-range, range}, {-range, range}},
+            Lighting -> lighting
+        ];
 
+        (* Print[graph]; *)
+
+        outputFileName = If[perspective, "perspective_", ""] <> "vertex_config_frame_" <> IntegerString[frameIndex, 10, 4] <> ".png";
+        outputFileName = FileNameJoin[{imageFolder, shapeFile, outputFileName}];
+        imageSize = {600, 450}; (* has to be 4:3 *)
+        cropCommand = "mogrify -crop " <> IntegerString[imageSize[[2]]] <> "x" <> IntegerString[imageSize[[2]]] <> "+" <> IntegerString[(imageSize[[1]]-imageSize[[2]])/2] <> "+0 " <> outputFileName;
+
+        If[exportToPov,
+            If[FileExistsQ[outputFileName], DeleteFile[outputFileName]];
+            POVRayRender[graph, Method -> "Triangle", OutputPath -> outputFileName, ImageSize -> imageSize, RenderOptions -> "+A0.001 -J +UA"];
+            Run[cropCommand];
+            ,
+            Export[outputFileName, graph];
+        ]
+        Print["Saved the image to " <> outputFileName]; 
+    ];
+
+    (* gif:
+    magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 vertex_config_frame_*.png vertex_config.gif
+    magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 perspective_vertex_config_frame_*.png perspective_vertex_config.gif
+    magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 perspective_vertex_config_*.png perspective_vertex_config.gif
+
+     *)
 ];
 
 

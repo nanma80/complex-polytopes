@@ -193,7 +193,7 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     
     graphElements = {
         {
-            (* FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]] *)
+            FaceForm[Yellow], Map[Sphere[#, thickness * 3]&, Map[projectToDirection[#, projectionMatrix]&, realVertices]]
         }
     };
 
