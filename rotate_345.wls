@@ -221,6 +221,11 @@ If[isOrthogonal,
     cell600Edges = cell600Data["edges"];
     cell600Vertices = cell600Data["vertices"];
 
+    edge1 = cell600Edges[[1]];
+    Print[edge1];
+    Print[edge1[[1]].edge1[[2]]/Norm[edge1[[1]]]^2//N];
+    Print[ArcCos[edge1[[1]].edge1[[2]]/Norm[edge1[[1]]]^2]/Pi*180//N];
+
     Print["Intersection of 600-cell vertices and 3{4}5 vertices"];
     (* 120. 3{4}5 vertices contain the 120 vertices of 600-cell *)
     Print[Intersection[N[cell600Vertices], rotatedVertices, SameTest -> SameMatrix]//Length];
@@ -349,9 +354,18 @@ If[isOrthogonal,
     (* gif:
     magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 vertex_config_frame_*.png vertex_config.gif
     magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 perspective_vertex_config_frame_*.png perspective_vertex_config.gif
-    magick convert -duplicate 1,-2-1 -quiet +repage -alpha remove -loop 0 -delay 10 -dispose 2 perspective_vertex_config_*.png perspective_vertex_config.gif
 
      *)
 ];
 
+(* 
 
+3{4}5 has 360 vertices. 120 of them are from vertices of the 600-cell.
+To get the other 240 vertices, do the following.
+Consider 12 great circles from the discrete Hopf fibration, which are mapped from the 
+12 vertices of the regular icosahedron. Each of the 12 great circles goes 
+through 10 600-cell vertices and contain 10 600-cell edges (as arcs on S3).
+Break up each of such edges into 3 equal segments, which are delimited by two points.
+We have 240 breaking points. These are the additional 240 vertices of 3{4}5.
+
+ *)
