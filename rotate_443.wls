@@ -17,6 +17,7 @@ epsilon = 1*^-5;
 iterationLimit = 20;
 dataFolder = "data";
 imageFolder = "output";
+altMode = False;
 
 perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[1;;3]]] / (1 + point.(fullProjectionMatrix[[4]])/wDistance);
 projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
@@ -61,6 +62,23 @@ getParts[edge1_, numParts_] := Module[
     Table[(Sin[alpha - k * betaStep] edge1[[1]] + Sin[k * betaStep] edge1[[2]])/Sin[alpha], {k, 1, numParts - 1}]
 ];
 
+getEdges[vertices_] := Module[
+    {edgeLength, i, j},
+    edges = {};
+    edgeLength = 10^10;
+    For[i = 2, i < Length[vertices], i++, 
+        If[ Norm[vertices[[i]] - vertices[[1]]] < edgeLength, edgeLength = Norm[vertices[[i]] - vertices[[1]]]];
+    ];
+
+    For[i = 1, i <= Length[vertices]-1, i++, 
+        For[j = i + 1, j <= Length[vertices], j++, 
+            If[ Abs[Norm[vertices[[i]] - vertices[[j]]] - edgeLength] < epsilon, AppendTo[edges, {i, j}] ];   
+        ];
+    ];
+    edges
+];
+
+
 symbol = {4, 4, 3};
 
 p1 = symbol[[1]];
@@ -100,12 +118,23 @@ Print[Map[Norm, beforePoints]];
 fourBeforePoints = beforePoints[[1;;4]];
 Print[Det[fourBeforePoints]];
 
-theoreticalPoints = {
-    {2, 0, 0, 0},
-    {1, 1, 1, 1},
-    {1, 1, 1, -1},
-    {1, 1, -1, 1}
-};
+theoreticalPoints = 
+If[altMode,
+    (* vertex first projectin of 24-cell *)
+    {
+        {2, 0, 0, 0},
+        {1, 1, 1, 1},
+        {1, 1, 1, -1},
+        {1, 1, -1, 1}
+    } Sqrt[3],
+    (* cell first projectin of 24-cell *)
+    theoreticalPoints = {
+        {1, 1, 0, 0},
+        {1, 0, 1, 0},
+        {1, 0, 0, 1},
+        {1, 0, 0, -1}
+    } 2 Sqrt[3]
+];
 
 rot4d = Inverse[fourBeforePoints].theoreticalPoints;
 
@@ -126,12 +155,25 @@ If[isOrthogonal,
     rotatedVertices = realVertices.rot4d;
     rotatedEdges = Map[#.rot4d&, realEdges];
     Print[rotatedVertices//Length]; (* 96 *)
+    (* Print[rotatedVertices]; (* 96 *) *)
 
-    polytopeFileName = FileNameJoin[{dataFolder, "polytope_3_4_3_alt.wl"}];
+    knownValues = Union[Flatten[theoreticalPoints]//FullSimplify, {Sqrt[3]}];
+    (* Print[knownValues]; *)
+    snappedVertices = Map[snap[#, knownValues]&, rotatedVertices, {2}];
+    snappedEdges = Map[snap[#, knownValues]&, rotatedEdges, {3}];
+
+    (* Print[snappedVertices]; *)
+    (* Print[snappedEdges]; *)
+    rotatedVertices = snappedVertices;
+    rotatedEdges = snappedEdges;
+    Print[rotatedVertices[[1;;10]]];
+
+    polytopeDataFileName = If[altMode, "polytope_3_4_3_alt.wl", "polytope_3_4_3.wl"];
+    polytopeFileName = FileNameJoin[{dataFolder, polytopeDataFileName}];
 
     If[!FileExistsQ[polytopeFileName],
         Print["Generating polytope data for " <> polytopeFileName];
-        polytopeCells = Get["../star-polytope/data/polytope_3_4_3_alt.wl"];
+        polytopeCells = Get["../star-polytope/data/" <> polytopeDataFileName];
         Print[polytopeCells//Length]; (* 24 *)
         polytopeFaces = Union[ Flatten[polytopeCells, 1], SameTest -> sameCenter];
         Print[polytopeFaces//Length]; (* 96 *)
@@ -151,9 +193,12 @@ If[isOrthogonal,
         Print["Saved polytope data to " <> polytopeFileName];
     ];
 
+    factor = If[altMode, Sqrt[3], Sqrt[3] * 2];
     polytopeData = Get[polytopeFileName];
-    polytopeEdges = polytopeData["edges"];
-    polytopeVertices = polytopeData["vertices"];
+    polytopeEdges = polytopeData["edges"] * factor //Simplify;
+    polytopeVertices = polytopeData["vertices"] * factor //Simplify;
+    polytopeFaces = polytopeData["faces"] * factor //Simplify;
+    polytopeCells = polytopeData["cells"] * factor //Simplify;
 
     edge1 = polytopeEdges[[1]];
     Print[edge1];
@@ -167,6 +212,56 @@ If[isOrthogonal,
     otherVertices = Complement[rotatedVertices, N[polytopeVertices], SameTest -> SameMatrix];
     (* 72 other vertices *)
     Print[otherVertices//Length];
+
+    targetNorm = snappedVertices[[1]]//Norm//Simplify;
+    Print["targetNorm" <> ToString[InputForm[targetNorm]]];
+
+    polytopeVertices = polytopeVertices / Norm[polytopeVertices[[1]]] * targetNorm//Simplify;
+    edgeCenters = Map[Total, polytopeEdges];
+    edgeCenters = edgeCenters / Norm[edgeCenters[[1]]] * targetNorm//Simplify;
+
+    (* Print["edge centers"]; *)
+    (* Print[edgeCenters]; *)
+    (* alt: {3, 1, 1, 1}, normalized, plus minus, permutate *)
+    (* alt: {0, 2, 2, 2}, normalized, plus minus, permutate *)
+    (* original: {4, 2, 2, 0} *)
+
+    faceCenters = Map[Total, polytopeFaces];
+    faceCenters = faceCenters / Norm[faceCenters[[1]]] * targetNorm//Simplify;
+    (* Print["face centers"]; *)
+    (* Print[faceCenters]; *)
+    (* alt: {2, 1, 1, 0}, normalized, plus minus, permutate *)
+    (* original: {3, 1, 1, 1} * Sqrt[2], {0, 2, 2, 2} * Sqrt[2] *)
+
+    Print[Intersection[N[polytopeVertices], snappedVertices, SameTest -> SameMatrix]//Length];
+
+
+    nearestNeighborEdges = {};
+
+    edgeIndices = getEdges[snappedVertices];
+    Print["Number of nearest neighbor edges: " <> IntegerString[Length[edgeIndices]]];
+    edges = Map[snappedVertices[[#]]&, edgeIndices, {2}];
+    verticesInEdges = Union[Flatten[edges, 1]];
+
+    Print[verticesInEdges//Length]; (* 96 *)
+    Print[snappedVertices//Length]; (* 96 *)
+    Print[edgeIndices//Length]; (* 96 *)
+
+    components = ConnectedComponents[Graph[edgeIndices]];
+    Print[components//Length]; (* 8 *)
+    Print[Length/@components]; (* 12 *)
+
+    Print["vertices by great cicles"];
+    verticesInComps = {};
+    For[compIndex = 1, compIndex <= Length[components], compIndex++,
+      component = components[[compIndex]];
+      verticesInComp = Map[snappedVertices[[#]]&, component];
+
+      Print[Intersection[N[polytopeVertices], verticesInComp, SameTest -> SameMatrix]//Length];
+      Print[verticesInComp];
+
+      AppendTo[verticesInComps, verticesInComp];
+    ];
 
 (*     Print["Breaking edges to 5 parts"];
 

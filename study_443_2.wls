@@ -155,15 +155,15 @@ polytopeVertices = polytopeVertices / Norm[polytopeVertices[[1]]] * targetNorm//
 edgeCenters = Map[Total, polytopeEdges];
 edgeCenters = edgeCenters / Norm[edgeCenters[[1]]] * targetNorm//Simplify;
 
-Print["edge centers"];
-Print[edgeCenters];
+(* Print["edge centers"]; *)
+(* Print[edgeCenters]; *)
 (* {3, 1, 1, 1}, normalized, plus minus, permutate *)
 (* {0, 2, 2, 2}, normalized, plus minus, permutate *)
 
 faceCenters = Map[Total, polytopeFaces];
 faceCenters = faceCenters / Norm[faceCenters[[1]]] * targetNorm//Simplify;
-Print["face centers"];
-Print[faceCenters];
+(* Print["face centers"]; *)
+(* Print[faceCenters]; *)
 (* {2, 1, 1, 0}, normalized, plus minus, permutate *)
 
 Print[Intersection[N[polytopeVertices], snappedVertices, SameTest -> SameMatrix]//Length];
