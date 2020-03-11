@@ -13,7 +13,7 @@ symbols = {
     (* , {5, 3, 2} *)
     (* {5, 6, 2} *)
     (* {5, 4, 3} *)
-    {3, 4, 5}
+    {4, 4, 3}
     (* {5, 3, 5} *)
 };
 
@@ -24,7 +24,7 @@ imageFolder = "output";
 
 imageSize = {600, 450};
 
-rangeFactor = 0.25;
+rangeFactor = 0.5;
 
 Needs["POVRayRender`"];
 ConfigurePOVRayRender["POVRayPath" -> "C:\\Program Files\\POV-Ray\\v3.7\\bin\\pvengine64.exe"];
@@ -103,7 +103,10 @@ exportImage[symbol_, theta_, phi3d_, serialNumber_, frameFolder_] := Module[
     && #[[3]][[4]]>threshold && #[[4]][[4]]>threshold && #[[5]][[4]]>threshold & ];
  *)
     (* 345 *)
-    threshold = 2.9;
+    (* threshold = 2.9; *)
+
+    (* 443 *)
+    threshold = 1.5;
 
     realVertices = Select[realVertices, #[[4]]>threshold&];
     realEdges = Select[realEdges, #[[1]][[4]]>threshold && #[[2]][[4]]>threshold
