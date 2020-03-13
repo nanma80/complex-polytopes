@@ -17,7 +17,7 @@ epsilon = 1*^-5;
 iterationLimit = 20;
 dataFolder = "data";
 imageFolder = "output";
-altMode = False;
+altMode = True;
 
 perspectiveProjection[point_, fullProjectionMatrix_, wDistance_ ] := projectToDirection[point, fullProjectionMatrix[[1;;3]]] / (1 + point.(fullProjectionMatrix[[4]])/wDistance);
 projectToDirection[vertex4d_, projectionMatrix_] := projectionMatrix.vertex4d;
@@ -233,8 +233,26 @@ If[isOrthogonal,
     (* alt: {2, 1, 1, 0}, normalized, plus minus, permutate *)
     (* original: {3, 1, 1, 1} * Sqrt[2], {0, 2, 2, 2} * Sqrt[2] *)
 
-    Print[Intersection[N[polytopeVertices], snappedVertices, SameTest -> SameMatrix]//Length];
+    cellCenters = Map[Mean[Mean[#]]&, polytopeCells];
+    cellCenters = cellCenters / Norm[cellCenters[[1]]] * targetNorm//Simplify;
 
+    innerCellFace = Map[#.faceCenters[[1]]&, cellCenters]//Max;
+    midPointsCellFace = {};
+    For[faceIndex = 1, faceIndex <= Length[faceCenters], faceIndex++,
+        faceCenter = faceCenters[[faceIndex]];
+        For[cellIndex = 1, cellIndex <= Length[cellCenters], cellIndex++,
+            cellCenter = cellCenters[[cellIndex]];
+            If[faceCenter.cellCenter > innerCellFace - epsilon,
+                midPoint = (faceCenter + cellCenter);
+                midPoint = midPoint / Norm[midPoint] * targetNorm//FullSimplify;
+                AppendTo[midPointsCellFace, midPoint];
+            ];
+        ];
+    ];
+    Print[midPointsCellFace//Length]; (* 192 *)
+
+    (* 24 *)
+    Print[Intersection[N[polytopeVertices], snappedVertices, SameTest -> SameMatrix]//Length];
 
     nearestNeighborEdges = {};
 
@@ -257,8 +275,20 @@ If[isOrthogonal,
       component = components[[compIndex]];
       verticesInComp = Map[snappedVertices[[#]]&, component];
 
-      Print[Intersection[N[polytopeVertices], verticesInComp, SameTest -> SameMatrix]//Length];
-      Print[verticesInComp];
+      Print["component index: " <> IntegerString[compIndex]];
+      Print["Intersection with vertices:  " <> IntegerString[
+        Intersection[N[polytopeVertices], verticesInComp, SameTest -> SameMatrix]//Length
+      ]];
+
+      Print["Intersection with edges:     " <> IntegerString[
+        Intersection[N[edgeCenters], verticesInComp, SameTest -> SameMatrix]//Length
+      ]];
+
+      Print["Intersection with midpoints: " <> IntegerString[
+        Intersection[N[midPointsCellFace], verticesInComp, SameTest -> SameMatrix]//Length
+      ]];
+
+      (* Print[verticesInComp]; *)
 
       AppendTo[verticesInComps, verticesInComp];
     ];
@@ -285,15 +315,25 @@ If[isOrthogonal,
 4{4}3 has 96 vertices. 24 of them are from vertices of the 24-cell.
 To get the other 72 vertices, do the following.
 Consider 8 great circles from the discrete Hopf fibration, which are mapped from the 
-8 vertices of the cube. Each of the 8 great circles goes 
-through 3 24-cell vertices.
+8 vertices of the cube.
 
-??? The following needs update. Still trying to figure out.
+  
 
-If it goes through one vertex, it goes through another one
-with 120 degrees away. 
+On 24-cell, 24 out of 96 edges form 4 great circles, each of which has 6 edges.
+Since 24-cell is self dual, the dual setup is that the 24 cells can be partitioned 
+into 4 rings of cells. Each ring has 6 octahedral cells.
 
-We break up each cell diagonal into 4 equal segments, which are delimited by 3 points.
-We have 72 breaking points. These are the additional 72 vertices of 4{4}3.
+From the original setup, the 4 great circles are used. On each circle, we have 6
+24-cell vertices and 6 edge centes. These 12 points are evenly distributed on the
+great circle with distances == Pi/6.
+
+From the dual setup, we can also find 4 great circles passing through cell centers
+and face centers. This time, we don't pick these centers, but pick the midpoints
+between these centers. In other words, we shift the centers by Pi/12 to 
+get the midpoints. We have 12 midpoints on each circle.
+
+These midpoints, the 24-cell vertices and selected edge centers form the 4D 
+representation of the vertices of 4{4}3.
+
 
 *)

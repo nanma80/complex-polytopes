@@ -243,8 +243,58 @@ Select[snappedEdges, Length[Intersection[#, {otherVertices[[1]]}]] > 0&]
 (* otherVertices must be a rotated version of 24 CC + 24 FC *)
 
 
+nInner[x_, y_]:= (x.y)/Norm[x]/Norm[y];
 
 epsilon = 0.00001;
 SameMatrix[m1_, m2_] := ( m1 == m2 ) || (Max[Max[N[Abs[m1 - m2]]]] < epsilon);
+getMultiple[edge1_, multiplier_] := Module[
+    {alpha, betaStep},
+    alpha = ArcCos[edge1[[1]].edge1[[2]]/Norm[edge1[[1]]]^2];
+    betaStep = alpha * multiplier;
+    (Sin[alpha - betaStep] edge1[[1]] + Sin[betaStep] edge1[[2]])/Sin[alpha]
+];
+getParts[edge1_, numParts_] := Module[
+    {alpha, betaStep},
+    alpha = ArcCos[edge1[[1]].edge1[[2]]/Norm[edge1[[1]]]^2];
+    betaStep = alpha/numParts;
+    Table[(Sin[alpha - k * betaStep] edge1[[1]] + Sin[k * betaStep] edge1[[2]])/Sin[alpha], {k, 1, numParts - 1}]
+];
+
 Select[snappedEdges, Length[Intersection[#, {{Sqrt[3], Sqrt[3], Sqrt[3], Sqrt[3]}}, SameTest->SameMatrix]]>0&]
+
+
+(* In a vertex first view, *)
+cc1 = {0, 0, 0, 2 Sqrt[3]};
+cc2 = {Sqrt[3], -Sqrt[3], -Sqrt[3], Sqrt[3]};
+(* are vertices. *)
+
+(* And FCs are edge centers: *)
+fc1 = {2, 2, 0, 2};
+(* from {1, 1, 1, 1} and {1, 1, -1, 1} *)
+fc2 = {1, -1, 1, 3};
+(* from {1, -1, 1, 1} and {0, 0, 0, 2} *)
+mid1 = (fc1 + cc1)/2//Simplify;
+mid2 = (fc2 + cc2)/2//Simplify;
+
+(* new point: *)
+a = {2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}
+(* is on/in the cell of {2, 0, 0, 0}, {0, 0, 0, 2}, {1, +/-1, +/-1, 1} *)
+(* The cell is the set of {{x,y,z,w}: x+w=2} *)
+(* cell center:  *)
+cc = {1, 0, 0, 1} * Sqrt[6]; (* norm is as same as a and cc1 ... *)
+
+b = {2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}/(3+Sqrt[3])*2//FullSimplify
+(* is a scaled version of a on the cell. *)
+(* b = {2 - 2/Sqrt[3], 0, 2 - 4/Sqrt[3], 2/Sqrt[3]} *)
+
+b == cc + {-1,0,-2,1} * (2-Sqrt[3])/Sqrt[3]
+ArcCos[b.cc/Norm[b]/Norm[cc]]//FullSimplify
+(* Pi/12, 15 deg *)
+
+cc34 = {{1, 0, 0, 1}, {0, 0, -1, 1}};
+getParts[cc34, 4]*Sqrt[6]//Simplify
+
+=> {{2, 0, 1 - Sqrt[3], 1 + Sqrt[3]}, {Sqrt[2], 0, -Sqrt[2], 2 Sqrt[2]}, {-1 + Sqrt[3], 0, -2, 1 + Sqrt[3]}}
+
+The first and third points here are in snappedVertices.
 
