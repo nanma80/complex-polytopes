@@ -1,9 +1,9 @@
 #!/usr/bin/env wolframscript
 
 symbols = { 
-    {2, 6, 3},
-    {2, 8, 3}, 
-    {2, 10, 3} 
+    {2, 6, 3}
+    , {2, 8, 3} 
+    , {2, 10, 3}
 };
 
 epsilon = 0.00001;
@@ -20,7 +20,10 @@ getFileName[symbol_] := "complex_polytope_" <> IntegerString[symbol[[1]]] <> "_"
 getShapeName[symbol_] := IntegerString[symbol[[1]]] <> "{" <> getQString[symbol[[2]], "/"] <> "}" <> IntegerString[symbol[[3]]];
 maxNorm[direction_, realVertices_] := Max[Map[(#.direction)^2/direction.direction&, realVertices]];
 getReal[complexVector_] := Flatten[ Map[{Re[#], Im[#]}&, complexVector] ];
-
+doubleRotation[theta_] := ArrayFlatten[{
+    {RotationMatrix[theta], 0},
+    {0, RotationMatrix[theta]}
+    }];
 decomposeUnitary[r1_] := Module[{eiphiby2, phi, r1Right, theta, eiphi1, eiphi2, phi1, phi2, psi, delta, approximateR1}, 
     eiphiby2 = Sqrt[Det[r1]];
     phi = Im[Log[Det[r1]]];
@@ -135,6 +138,37 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
     vertices1 = partitionDataObject["vertices1"];
     vertices2 = partitionDataObject["vertices2"];
 
+    (* how to get vertices2 from vertices1? Double rotation to move points
+    along Hopf fibration circles *)
+    vertex1 = vertices1[[1]];
+    vertex2 = MaximalBy[ Map[{vertex1.#, #} &, vertices2], #[[1]]&][[1,2]];
+    orth4d = Orthogonalize[{vertex1, vertex2, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}];
+    theta = ArcCos[vertex2.vertex1/Norm[vertex1]/Norm[vertex2]];
+    rot4d = Transpose[orth4d].doubleRotation[-theta].orth4d;
+
+    ints = Intersection[vertices2, vertices1.rot4d, SameTest -> SameMatrix];
+    Print["Lengths of vertices1, vertices2, and the intersection between vertices1 and its rotated version"];
+    Print[Length/@{vertices1, vertices2, ints}];
+
+
+    count = 0;
+    For[index2 = 1, index2 <= Length[vertices2], index2++,
+        vertex1 = vertices1[[1]];
+        (* vertex2 = MaximalBy[ Map[{vertex1.#, #} &, vertices2], #[[1]]&][[1,2]]; *)
+        (* vertex2 = SortBy[Map[{vertex1.#, #} &, vertices2], -#[[1]]&][[3,2]]; *)
+        vertex2 = vertices2[[index2]];
+        orth4d = Orthogonalize[{vertex1, vertex2, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}];
+        theta = ArcCos[vertex2.vertex1/Norm[vertex1]/Norm[vertex2]];
+        rot4d = Transpose[orth4d].doubleRotation[-theta].orth4d;
+
+        ints = Intersection[vertices2, vertices1.rot4d, SameTest -> SameMatrix];
+        (* Print["Lengths of vertices1, vertices2, and the intersection between vertices1 and its rotated version"]; *)
+        Print[{index2, Length[ints], theta/Pi*180}];
+        If[Length[ints] == Length[vertices1], count++];
+    ];
+    Print[count];
+
+    
     norm = Norm[vertices1[[1]]];
 
     Print["Vertex counts:"];
