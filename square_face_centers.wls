@@ -180,25 +180,19 @@ For[symbolIndex = 1, symbolIndex <= Length[symbols], symbolIndex++,
 
     count = 0;
     For[index2 = 1, index2 <= Length[vertices2], index2++,
-        Print[];
         vertex1 = vertices1[[1]];
-        (* vertex2 = MaximalBy[ Map[{vertex1.#, #} &, vertices2], #[[1]]&][[1,2]]; *)
-        (* vertex2 = SortBy[Map[{vertex1.#, #} &, vertices2], -#[[1]]&][[3,2]]; *)
         vertex2 = vertices2[[index2]];
-        orth4d = Orthogonalize[{vertex1, vertex2, {0, 0.2, 1000, 0}, {0, 1.3, 0, -1000}}];
+        v3 = {0, 0.2, 1000, 0};
+        v4 = {0, 1.3, 0, -1000};
+        orth4d = Orthogonalize[{vertex1, vertex2, v3, v4}];
+        If[Det[orth4d] < 0, orth4d = Orthogonalize[{vertex1, vertex2, v4, v3}]];
+
         theta = ArcCos[vertex2.vertex1/Norm[vertex1]/Norm[vertex2]];
         rot4d = Transpose[orth4d].doubleRotation[-theta].orth4d;
 
         ints = Intersection[vertices2, vertices1.rot4d, SameTest -> SameMatrix];
-        (* Print["Lengths of vertices1, vertices2, and the intersection between vertices1 and its rotated version"]; *)
-
-        orth4d = Orthogonalize[{vertex1, vertex2, {0, 1.3, 0, -1000}, {0, 0.2, 1000, 0}}];
-        rot4d = Transpose[orth4d].doubleRotation[-theta].orth4d;
-
-        ints2 = Intersection[vertices2, vertices1.rot4d, SameTest -> SameMatrix];
-        (* Print["Lengths of vertices1, vertices2, and the intersection between vertices1 and its rotated version"]; *)
-        Print[{index2, Length[ints], Length[ints2], theta/Pi*180}];
-        If[Length[ints] == Length[vertices1] || Length[ints2] == Length[vertices1], count++];
+        Print[{index2, Length[ints]}];
+        If[Length[ints] == Length[vertices1], count++];
     ];
     Print[count];
 
